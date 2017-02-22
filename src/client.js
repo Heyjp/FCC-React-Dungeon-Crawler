@@ -1,7 +1,7 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-class Canopy extends React.Component {
+class Canvas extends React.Component {
   constructor (props) {
     super(props);
   }
@@ -15,6 +15,6 @@ class Canopy extends React.Component {
 }
 
 ReactDOM.render(
-  <Canopy />,
+  <Canvas />,
   document.getElementById('root')
 );
