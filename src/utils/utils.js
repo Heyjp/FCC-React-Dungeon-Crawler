@@ -3,7 +3,7 @@ function Point(x, y) {
     this.y = y;
 }
 
-function random(min, max) {
+export function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -120,66 +120,11 @@ function populateMap(enemies) {
     }
 }
 
-function compareLocations (player, objects, direction) {
-    // loop over all the objects to see if the playerLoc clashes with any of the objects
-
-    // make sure combat does not occur unless moving towards enemy
-    if (player.moving === false) {
-      return false
-    }
-
-    for (let i = 0; i < objects.length; i++) {
-      if (detectCollision(player, objects[i])) {
-        console.log("collision detected, false");
-        return false;
-      }
-    }
-    console.log("true")
-    return true;
-}
-
-
-function detectCollision (player, obj) {
-      // Is the object x and y overlapping
-
-      if (
-         (player.x >= obj.x && player.y  >= obj.y) && (player.x  <= obj.x + obj.destWidth && player.y <= obj.y + obj.destHeight)
-      || ((player.x + player.destWidth >= obj.x && player.y + player.destHeight >= obj.y) && (player.x +player.destWdith <= obj.x + obj.destWidth && player.y + player.destHeight <= obj.y + obj.destHeight) )
-      )
-        {
-          console.log("handling collison", obj);
-          handleCollision(player, obj);
-          return true;
-        }
-      else {
-        return false;
-      }
-}
-
-function handleCollision (player, obj) {
-
-      if (obj.constructor.name === "Enemy") {
-        // run combat function
-        return player.fightEnemy(obj);
-      } else if (obj.constructor.name === "Weapon") {
-        console.log("Weapon");
-        // pick up weapon function
-        return player.updateWeapon(obj);
-      } else if (obj.constructor.name === "Potion") {
-        console.log("Health")
-        // update health
-        return player.updateHealth(obj);
-      } else if (obj.constructor.name === "Boss") {
-        console.log("Health")
-        // update health
-        return player.fightEnemy(obj);
-      }
-  }
 
   function clearItems (objArray) {
     for (let i = 0; i < objArray.length; i++) {
 
-      if (objArray[i].remove !== undefined) {
+      if (objArray[i].remove !== undefine) {
         objArray.splice(i, 1);
       }
     }
@@ -302,24 +247,27 @@ function handleCollision (player, obj) {
   }
 
 
-  function changeDirection (e){
-    console.log("keydown")
+export function changeDirection (e, player){
     player.moving = true;
-        switch(e.keyCode)
+        switch(e)
           {
               case 37: // left arrow
+                  console.log("changeDir left");
                   player.left = true;
                   player.direction = "left";
                   break;
               case 38: // up arrow
+              console.log("changeDir up");
                 player.up = true;
                 player.direction = "up";
                   break;
               case 39: // right arrow
+              console.log("changeDir right");
                   player.right = true;
                   player.direction = "right";
                   break;
               case 40: // down arrow
+              console.log("changeDir down");
                   player.down = true;
                   player.direction = "down";
                   break;
@@ -327,6 +275,28 @@ function handleCollision (player, obj) {
                 return;
           }
   }
+
+export function cancelDirection (e, player) {
+    player.direction = false;
+    player.moving = false;
+      switch(e)
+      {
+          case 37: // left arrow
+              player.left = false;
+              break;
+          case 38: // up arrow
+              player.up = false;
+              break;
+          case 39: // right arrow
+              player.right = false;
+              break;
+          case 40: // down arrow
+              player.down = false;
+              break;
+          default:
+            return;
+      }
+}
 
   function startTheGame () {
     loadImages();

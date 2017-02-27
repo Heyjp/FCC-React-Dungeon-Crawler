@@ -7,14 +7,16 @@
 
 import React from 'react';
 
-class Camera extends React.Component {
+export default class Camera  {
 
-  constructor (canvas, worldMap) {
+  constructor (canvas, theMap) {
+
     this.x = 0;
     this.y = 0
 
     this.xView = canvas.width;
     this.yView = canvas.height;
+
     this.centerX = this.xView / 2;
     this.centerY = this.yView / 2;
 
@@ -23,8 +25,8 @@ class Camera extends React.Component {
     this.deadZoneY = 0;
 
     // map dimensions
-    this.worldW = worldMap.w;
-    this.worldH = worldMap.h;
+    this.worldW = theMap.map.leaf.w;
+    this.worldH = theMap.map.leaf.h;
   }
 
   follow (followObj) {
@@ -32,6 +34,7 @@ class Camera extends React.Component {
   }
 
   update () {
+    console.log("updating");
     // Camera within the boundaries of the world map
     if (this.follow.x - this.centerX < 0) {
         this.x = 0;
@@ -50,8 +53,8 @@ class Camera extends React.Component {
     }
   }
 
-  draw () {
-    v_context.clearRect(0, 0, canvas.width, canvas.height);
-    v_context.drawImage(canvas, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
+  draw (ctx, notTheMap) {
+    // ctx.clearRect(0, 0, this.xView, this.yView);
+    ctx.drawImage(notTheMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
   }
 }

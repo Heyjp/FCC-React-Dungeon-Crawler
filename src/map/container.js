@@ -1,14 +1,24 @@
 import React from 'react';
 
-class Container extends React.Component {
-  constructor(x, y, w, h) {
+const SQUARE = 1;
+
+class Point {
+  constructor (x, y)  {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+export default class Container {
+
+  constructor (x, y, w, h) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
-    this.center = new Point(
-      this.x + (this.w / 2),
-      this.y + (this.h / 2),
+    this.center = new Point (
+        this.x + (this.w / 2),
+        this.y + (this.h / 2)
     )
   }
 
@@ -20,6 +30,14 @@ class Container extends React.Component {
     );
   }
 
+  drawPath (ctx, container) {
+    ctx.beginPath();
+    ctx.lineWidth = SQUARE * 25;
+    ctx.strokeStyle = "#888";
 
+    ctx.moveTo(this.center.x * SQUARE, this.center.y * SQUARE);
+    ctx.lineTo(container.center.x * SQUARE, container.center.y * SQUARE);
+    ctx.stroke();
+  }
 
 }

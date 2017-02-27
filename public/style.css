@@ -15,7 +15,5 @@ body {background-color: black; padding: 0px; margin: 0px; overflow: hidden;}
 }
 
 canvas {
-  width: 750px;
-  height: 750px;
   border: 2px solid white;
 }

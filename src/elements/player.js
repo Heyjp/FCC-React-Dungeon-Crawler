@@ -1,6 +1,7 @@
-import React from 'react';
+import {checkContext, compareLocations} from '../utils/collision.js';
 
-class Player extends React.Component {
+
+export default class Player  {
 
   constructor () {
     // source of img file
@@ -13,11 +14,12 @@ class Player extends React.Component {
     this.sourceWidth = 15;
     this.sourceHeight = 15;
     // location to place on canvas
-    this.destX = this.x;
-    this.destY = this.y;
 
-    this.destWidth = 35;
-    this.destHeight = 35;
+    this.x = 200;
+    this.y = 200;
+
+    this.destWidth = 20;
+    this.destHeight = 20;
 
     // Combat Stats
     this.health = 100;
@@ -33,14 +35,21 @@ class Player extends React.Component {
     this.weaponDamage = 0;
     this.damage = 10;
 
+    // movement
+
+    this.left = false;
+    this.right = false;
+    this.up = false;
+    this.down = false;
+
   }
 
-  update () {
-
-    if (!checkContext(mapCopy, this)) {
+  update (worldCtx, gameItems) {
+    console.log(this, "does this have player.direction")
+    if (!checkContext(worldCtx, this)) {
       return false
     }
-
+    console.log(this, "this");
     if (compareLocations (this, gameItems)) {
         if (this.left) {
             this.x -= 10;
@@ -71,7 +80,7 @@ class Player extends React.Component {
       }
     }
 
-    draw () {
+    draw (ctx, worldMap) {
       // Check to see whether player is in the deadZone
       this.xDeadZone = 375;
       this.yDeadZone = 375;
@@ -80,23 +89,23 @@ class Player extends React.Component {
       let cameraY;
 
 
-      if (this.x >= this.xDeadZone && this.x < canvas.width - this.xDeadZone) {
+      if (this.x >= this.xDeadZone && this.x < worldMap.width - this.xDeadZone) {
           cameraX = this.xDeadZone;
-      } else if (this.x > canvas.width - this.xDeadZone) {
-          cameraX = (this.x - canvas.width) + this.xDeadZone * 2;
+      } else if (this.x > worldMap.width - this.xDeadZone) {
+          cameraX = (this.x - worldMap.width) + this.xDeadZone * 2;
       } else {
           cameraX = this.x;
       }
 
-      if (this.y >= this.yDeadZone && this.y < canvas.height - this.yDeadZone) {
+      if (this.y >= this.yDeadZone && this.y < worldMap.height - this.yDeadZone) {
           cameraY = this.yDeadZone;
-      } else if (this.y > canvas.height - this.yDeadZone) {
-          cameraY = (this.y - canvas.height) + this.yDeadZone * 2;
+      } else if (this.y > worldMap.height - this.yDeadZone) {
+          cameraY = (this.y - worldMap.height) + this.yDeadZone * 2;
       } else {
           cameraY = this.y;
       }
 
-      v_context.drawImage(this.img,
+      ctx.drawImage(this.img,
           this.sourceY,
           this.sourceX,
           this.sourceWidth,
@@ -173,11 +182,5 @@ class Player extends React.Component {
       startTheGame();
     }
 
-    direction () {
-      this.left = false;
-      this.right = false;
-      this.up = false;
-      this.down = false;
-    }
 
 }

@@ -1,7 +1,6 @@
 import React from 'react';
 
-
-class Tree extends React.Component {
+class Tree {
 
   constructor(leaf) {
     this.leaf = leaf;
@@ -9,8 +8,16 @@ class Tree extends React.Component {
     this.rchild = undefined;
   }
 
+  getLeafs () {
+    if (this.lchild === undefined && this.rchild === undefined) {
+        return [this.leaf];
+    } else {
+        return [].concat(this.lchild.getLeafs(), this.rchild.getLeafs())
+    }
+  }
+
   getLevel(level, queue) {
-    if (queue) === undefined) {
+    if (queue === undefined) {
       queue = [];
     }
 
@@ -39,3 +46,6 @@ class Tree extends React.Component {
   }
 
 }
+
+
+export {Tree as default}

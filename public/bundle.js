@@ -46,6 +46,10 @@
 
 	'use strict';
 
+	var _extends2 = __webpack_require__(279);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
 	var _getPrototypeOf = __webpack_require__(1);
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -74,6 +78,30 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
+	var _canvas = __webpack_require__(269);
+
+	var _canvas2 = _interopRequireDefault(_canvas);
+
+	var _room = __webpack_require__(274);
+
+	var _room2 = _interopRequireDefault(_room);
+
+	var _roomBuilder = __webpack_require__(272);
+
+	var _camera = __webpack_require__(275);
+
+	var _camera2 = _interopRequireDefault(_camera);
+
+	var _player = __webpack_require__(276);
+
+	var _player2 = _interopRequireDefault(_player);
+
+	var _images = __webpack_require__(277);
+
+	var _images2 = _interopRequireDefault(_images);
+
+	var _utils = __webpack_require__(273);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Canvas = function (_React$Component) {
@@ -81,28 +109,275 @@
 
 	  function Canvas(props) {
 	    (0, _classCallCheck3.default)(this, Canvas);
-	    return (0, _possibleConstructorReturn3.default)(this, (Canvas.__proto__ || (0, _getPrototypeOf2.default)(Canvas)).call(this, props));
+
+	    var _this = (0, _possibleConstructorReturn3.default)(this, (Canvas.__proto__ || (0, _getPrototypeOf2.default)(Canvas)).call(this, props));
+
+	    _this.state = {
+	      worldMap: new _canvas2.default(),
+	      player: new _player2.default()
+	    };
+	    return _this;
 	  }
 
 	  (0, _createClass3.default)(Canvas, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this.drawCanvas();
+	      this.setBackupCanvas();
+	      this.setCamera();
+	    }
+	  }, {
+	    key: 'drawCanvas',
+	    value: function drawCanvas() {
+	      var ctx = this.state.worldMap.canvas.getContext('2d');
+	      this.state.worldMap.map.paint(ctx);
+	      this.state.worldMap.rooms.forEach(function (e) {
+	        e.paint(ctx);
+	      });
+	      (0, _roomBuilder.draw_paths)(ctx, this.state.worldMap.map);
+	    }
+	  }, {
+	    key: 'handleKeyDown',
+	    value: function handleKeyDown(e) {
+	      (0, _utils.changeDirection)(e.keyCode, this.state.player);
+	    }
+	  }, {
+	    key: 'handleKeyUp',
+	    value: function handleKeyUp(e) {
+	      (0, _utils.cancelDirection)(e.keyCode, this.state.player);
+	    }
+	  }, {
+	    key: 'setBackupCanvas',
+	    value: function setBackupCanvas() {
+
+	      var backupCanvas = document.createElement('canvas');
+	      backupCanvas.width = 2000;
+	      backupCanvas.height = 2000;
+	      var backupCtx = backupCanvas.getContext('2d');
+	      backupCtx.drawImage(this.state.worldMap.canvas, 0, 0);
+
+	      this.setState({
+	        backupWorldMap: backupCanvas
+	      });
+	    }
+	  }, {
+	    key: 'setCamera',
+	    value: function setCamera() {
+	      var canvas = this.refs.canvas;
+	      var ctx = this.refs.canvas.getContext('2d');
+
+	      var camera = new _camera2.default(this.refs.canvas, this.state.worldMap);
+	      camera.follow(this.state.player);
+
+	      camera.draw(ctx, this.state.worldMap.canvas);
+
+	      var newState = (0, _extends3.default)({}, this.state);
+	      newState.camera = camera;
+
+	      // this.setState creates a pending state update, can write a cb to update you when the state has been updated
+	      this.setState(newState, function () {
+	        var _this2 = this;
+
+	        setInterval(function () {
+	          _this2.updateMap(_this2.state.worldMap.canvas.getContext('2d'), []);
+	        }, 100);
+	        return;
+	      });
+	      // store intervalId in the state so it can be accessed later:
+	    }
+	  }, {
+	    key: 'updateMap',
+	    value: function updateMap(ctx, gameItems) {
+	      this.state.player.update(ctx, gameItems);
+	      this.state.camera.update();
+	      this.drawNewMap();
+	    }
+	  }, {
+	    key: 'drawNewMap',
+	    value: function drawNewMap() {
+	      var drawNewCanvas = this.refs.canvas;
+	      var ctx = drawNewCanvas.getContext('2d');
+	      ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
+	      this.state.camera.draw(ctx, this.state.worldMap.canvas);
+	      this.state.player.draw(ctx, this.state.worldMap.canvas);
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
-	      return _react2.default.createElement(
-	        'div',
-	        null,
-	        'Hello World!',
-	        _react2.default.createElement(
-	          'p',
-	          null,
-	          'Huuuugue works'
-	        )
-	      );
+	      return _react2.default.createElement('canvas', { tabIndex: '0', onKeyUp: this.handleKeyUp.bind(this), onKeyDown: this.handleKeyDown.bind(this), ref: 'canvas', width: this.props.width, height: this.props.height });
 	    }
 	  }]);
 	  return Canvas;
 	}(_react2.default.Component);
 
-	_reactDom2.default.render(_react2.default.createElement(Canvas, null), document.getElementById('root'));
+	var Legend = function (_React$Component2) {
+	  (0, _inherits3.default)(Legend, _React$Component2);
+
+	  function Legend(props) {
+	    (0, _classCallCheck3.default)(this, Legend);
+	    return (0, _possibleConstructorReturn3.default)(this, (Legend.__proto__ || (0, _getPrototypeOf2.default)(Legend)).call(this, props));
+	  }
+
+	  (0, _createClass3.default)(Legend, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'stat-block' },
+	        _react2.default.createElement(
+	          'ul',
+	          null,
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Player'
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Level: 0'
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Weapon: Nunchucks'
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Health'
+	          )
+	        ),
+	        _react2.default.createElement('hr', null),
+	        _react2.default.createElement(
+	          'ul',
+	          null,
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Enemy'
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Level: 0'
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Health: 100'
+	          )
+	        ),
+	        _react2.default.createElement('hr', null),
+	        _react2.default.createElement(
+	          'h4',
+	          null,
+	          'Legend'
+	        ),
+	        _react2.default.createElement(
+	          'ul',
+	          null,
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Player  ',
+	            _react2.default.createElement('img', { src: 'img/tuxedo.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Enemy ',
+	            _react2.default.createElement('img', { src: 'img/earth019.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Dragon ',
+	            _react2.default.createElement('img', { src: 'img/dragon.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Weapons Chest ',
+	            _react2.default.createElement('img', { src: 'img/chestRed.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Full Health Potion ',
+	            _react2.default.createElement('img', { src: 'img/pt1.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            '75% Potion ',
+	            _react2.default.createElement('img', { src: 'img/pt2.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            '50% Potion ',
+	            _react2.default.createElement('img', { src: 'img/pt3.png', alt: '' })
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            '25% potion ',
+	            _react2.default.createElement('img', { src: 'img/pt4.png', alt: '' })
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	  return Legend;
+	}(_react2.default.Component);
+
+	var Map = function (_React$Component3) {
+	  (0, _inherits3.default)(Map, _React$Component3);
+
+	  function Map(props) {
+	    (0, _classCallCheck3.default)(this, Map);
+
+	    var _this4 = (0, _possibleConstructorReturn3.default)(this, (Map.__proto__ || (0, _getPrototypeOf2.default)(Map)).call(this, props));
+
+	    _this4.state = {
+	      Images: new _images2.default()
+	    };
+
+	    return _this4;
+	  }
+
+	  (0, _createClass3.default)(Map, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this.state.Images.loadImages();
+	      console.log("Mounted!!!");
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(Canvas, { width: '750', height: '750' })
+	      );
+	    }
+	  }]);
+	  return Map;
+	}(_react2.default.Component);
+
+	_reactDom2.default.render(_react2.default.createElement(Map, null), document.getElementById('root'));
+
+	/*
+	<div>
+	  <h3>Roguelike Dungeon Crawler by HeyJP </h3>
+	  <div className="map-container">
+	    <Legend />
+	    <Canvas />
+	  </div>
+	</div>
+
+	*/
 
 /***/ },
 /* 1 */
@@ -23364,6 +23639,1280 @@
 
 	module.exports = ReactDOMInvalidARIAHook;
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(89)))
+
+/***/ },
+/* 269 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _container = __webpack_require__(270);
+
+	var _container2 = _interopRequireDefault(_container);
+
+	var _tree = __webpack_require__(271);
+
+	var _tree2 = _interopRequireDefault(_tree);
+
+	var _roomBuilder = __webpack_require__(272);
+
+	var _room = __webpack_require__(274);
+
+	var _room2 = _interopRequireDefault(_room);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var canvas = document.createElement('canvas');
+
+	var c_context = canvas.getContext('2d');
+
+	var MAP_SIZE = 2000;
+	var SQUARE = 1;
+	//canvas.width / MAP_SIZE;
+	var N_ITERATIONS = 5;
+
+	var newBox = new _container2.default(0, 0, 2000, 2000);
+	var container_tree = (0, _roomBuilder.split_container)(newBox, N_ITERATIONS);
+	var world = container_tree.getLeafs();
+
+	var roomArray = [];
+	world.forEach(function (e) {
+	    var room = new _room2.default(e);
+	    roomArray.push(room);
+	});
+
+	var WorldMap = function WorldMap() {
+	    (0, _classCallCheck3.default)(this, WorldMap);
+
+	    this.map = container_tree;
+	    this.rooms = roomArray;
+
+	    var canvas = document.createElement('canvas');
+	    canvas.width = MAP_SIZE;
+	    canvas.height = MAP_SIZE;
+
+	    this.canvas = canvas;
+	};
+
+	/*
+
+	Private and public functions...
+
+	public functions have access to private values
+
+
+	function Person(name, secret) {
+	    // public
+	    this.name = name;
+
+	    // private
+	    var secret = secret;
+
+	    // public methods have access to private members
+	    this.setSecret = function(s) {
+	        secret = s;
+	    }
+
+	    this.getSecret = function() {
+	        return secret;
+	    }
+	}
+
+	// Must use getters/setters
+	Person.prototype.spillSecret = function() { alert(this.getSecret()); };
+
+	*/
+
+
+	exports.default = WorldMap;
+
+/***/ },
+/* 270 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass2 = __webpack_require__(28);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SQUARE = 1;
+
+	var Point = function Point(x, y) {
+	  (0, _classCallCheck3.default)(this, Point);
+
+	  this.x = x;
+	  this.y = y;
+	};
+
+	var Container = function () {
+	  function Container(x, y, w, h) {
+	    (0, _classCallCheck3.default)(this, Container);
+
+	    this.x = x;
+	    this.y = y;
+	    this.w = w;
+	    this.h = h;
+	    this.center = new Point(this.x + this.w / 2, this.y + this.h / 2);
+	  }
+
+	  (0, _createClass3.default)(Container, [{
+	    key: "paint",
+	    value: function paint(c) {
+	      c.strokeStyle = "#0F0";
+	      c.lineWidth = SQUARE;
+	      c.strokeRect(this.x * SQUARE, this.y * SQUARE, this.w * SQUARE, this.h * SQUARE);
+	    }
+	  }, {
+	    key: "drawPath",
+	    value: function drawPath(ctx, container) {
+	      ctx.beginPath();
+	      ctx.lineWidth = SQUARE * 25;
+	      ctx.strokeStyle = "#888";
+
+	      ctx.moveTo(this.center.x * SQUARE, this.center.y * SQUARE);
+	      ctx.lineTo(container.center.x * SQUARE, container.center.y * SQUARE);
+	      ctx.stroke();
+	    }
+	  }]);
+	  return Container;
+	}();
+
+	exports.default = Container;
+
+/***/ },
+/* 271 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = undefined;
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(28);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Tree = function () {
+	  function Tree(leaf) {
+	    (0, _classCallCheck3.default)(this, Tree);
+
+	    this.leaf = leaf;
+	    this.lchild = undefined;
+	    this.rchild = undefined;
+	  }
+
+	  (0, _createClass3.default)(Tree, [{
+	    key: 'getLeafs',
+	    value: function getLeafs() {
+	      if (this.lchild === undefined && this.rchild === undefined) {
+	        return [this.leaf];
+	      } else {
+	        return [].concat(this.lchild.getLeafs(), this.rchild.getLeafs());
+	      }
+	    }
+	  }, {
+	    key: 'getLevel',
+	    value: function (_getLevel) {
+	      function getLevel(_x, _x2) {
+	        return _getLevel.apply(this, arguments);
+	      }
+
+	      getLevel.toString = function () {
+	        return _getLevel.toString();
+	      };
+
+	      return getLevel;
+	    }(function (level, queue) {
+	      if (queue === undefined) {
+	        queue = [];
+	      }
+
+	      if (level == 1) {
+	        queue.push(this);
+	      } else {
+	        if (this.lchild !== undefined) {
+	          this.lchild, getLevel(level - 1, queue);
+	        }
+	        if (this.rchild !== undefined) {
+	          this.rchild.getLevle(level - 1, queue);
+	        }
+	      }
+	      return queue;
+	    })
+	  }, {
+	    key: 'paint',
+	    value: function paint(c) {
+	      this.leaf.paint(c);
+
+	      if (this.lchild !== undefined) {
+	        this.lchild.paint(c);
+	      }
+	      if (this.rchild !== undefined) {
+	        this.rchild.paint(c);
+	      }
+	    }
+	  }]);
+	  return Tree;
+	}();
+
+	exports.default = Tree;
+
+/***/ },
+/* 272 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.split_container = split_container;
+	exports.random_split = random_split;
+	exports.draw_paths = draw_paths;
+
+	var _tree = __webpack_require__(271);
+
+	var _tree2 = _interopRequireDefault(_tree);
+
+	var _container = __webpack_require__(270);
+
+	var _container2 = _interopRequireDefault(_container);
+
+	var _utils = __webpack_require__(273);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var H_RATIO = 0.45;
+	var W_RATIO = 0.45;
+	var DISCARD_BY_RATIO = true;
+
+	function split_container(container, iter) {
+	    var root = new _tree2.default(container);
+	    if (iter != 0) {
+	        var sr = random_split(container);
+	        root.lchild = split_container(sr[0], iter - 1);
+	        root.rchild = split_container(sr[1], iter - 1);
+	    }
+	    return root;
+	}
+
+	function random_split(container) {
+	    var r1, r2;
+	    if ((0, _utils.random)(0, 1) == 0) {
+	        r1 = new _container2.default(container.x, container.y, (0, _utils.random)(1, container.w), container.h);
+	        r2 = new _container2.default(container.x + r1.w, container.y, container.w - r1.w, container.h);
+
+	        if (DISCARD_BY_RATIO) {
+	            var r1_w_ration = r1.w / r1.h;
+	            var r2_w_ration = r2.w / r2.h;
+
+	            if (r1_w_ration < W_RATIO || r2_w_ration < W_RATIO) {
+	                return random_split(container);
+	            }
+	        }
+	    } else {
+	        // Horizontal
+	        r1 = new _container2.default(container.x, container.y, container.w, (0, _utils.random)(1, container.h));
+	        r2 = new _container2.default(container.x, container.y + r1.h, container.w, container.h - r1.h);
+
+	        if (DISCARD_BY_RATIO) {
+	            var r1_h_ratio = r1.h / r1.w;
+	            var r2_h_ratio = r2.h / r2.w;
+	            if (r1_h_ratio < H_RATIO || r2_h_ratio < H_RATIO) {
+	                return random_split(container);
+	            }
+	        }
+	    }
+	    return [r1, r2];
+	}
+
+	function draw_paths(ctx, tree) {
+	    if (tree.lchild == undefined || tree.rchild == undefined) {
+	        return;
+	    }
+
+	    tree.lchild.leaf.drawPath(ctx, tree.rchild.leaf);
+	    draw_paths(ctx, tree.lchild);
+	    draw_paths(ctx, tree.rchild);
+	}
+
+/***/ },
+/* 273 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.random = random;
+	exports.changeDirection = changeDirection;
+	exports.cancelDirection = cancelDirection;
+	function Point(x, y) {
+	    this.x = x;
+	    this.y = y;
+	}
+
+	function random(min, max) {
+	    return Math.floor(Math.random() * (max - min + 1) + min);
+	}
+
+	function Container(x, y, w, h) {
+	    this.x = x;
+	    this.y = y;
+	    this.w = w;
+	    this.h = h;
+	    this.center = new Point(this.x + this.w / 2, this.y + this.h / 2);
+	}
+
+	function checkOverlap(object, x, y) {
+
+	    for (var i = 0; i < enemies.length; i++) {
+	        if (enemies[i].key === this.key) {
+	            continue;
+	        }
+	        var _x = void 0,
+	            _y = void 0,
+	            w = void 0,
+	            h = void 0;
+	        _x = enemies[i].x;
+	        _y = enemies[i].y;
+	        w = enemies[i].w;
+	        h = enemies[i].h;
+
+	        // Either x or y overlaps, find a new x and y on map
+	        if (this.x + this.width > _x && this.x + this.width <= _x + w) {
+	            this.getLocation(leafs);
+	        }
+	        if (this.y + this.height > _y && this.y + this.height <= _y + h) {
+	            this.getLocation(leafs);
+	        }
+	    }
+	    return true;
+	}
+
+	function randomSpot(leafs, object) {
+
+	    var rooms = leafs;
+	    var randomLeaf = rooms[Math.floor(Math.random() * (leafs.length - 0) + 0)];
+
+	    var newObj = findRandomSpot(randomLeaf);
+	    var x = newObj.x;
+	    var y = newObj.y;
+
+	    object.x = x;
+	    object.y = y;
+	}
+
+	function findRandomSpot(leaf) {
+
+	    // takes a random location in the room minus 40px for sprite width & height
+	    this.x = random(leaf.x + 40, leaf.x + leaf.w - 40);
+	    this.y = random(leaf.y + 40, leaf.y + leaf.h - 40);
+
+	    return this;
+	}
+
+	function createEnemies(min, max) {
+
+	    var minEnemies = min;
+	    var maxEnemies = max;
+
+	    var enemies = Math.random() * (max - min) + min;
+	    var enemiesArray = [];
+
+	    for (var i = 0; i < enemies; i++) {
+	        var newEnemy = new Enemy(i);
+	        enemiesArray.push(newEnemy);
+	    }
+
+	    var boss = new Boss();
+	    enemiesArray.push(boss);
+
+	    return enemiesArray;
+	}
+
+	function createWeapons(min, max) {
+
+	    var minEnemies = min;
+	    var maxEnemies = max;
+
+	    var enemies = Math.random() * (max - min) + min;
+	    var weaponsArray = [];
+
+	    for (var i = 0; i < enemies; i++) {
+	        var newWeapon = new Weapon(i);
+	        weaponsArray.push(newWeapon);
+	    }
+	    return weaponsArray;
+	}
+
+	function createPotions(min, max) {
+
+	    var minEnemies = min;
+	    var maxEnemies = max;
+
+	    var enemies = Math.random() * (max - min) + min;
+	    var potionsArray = [];
+
+	    for (var i = 0; i < enemies; i++) {
+	        var newEnemy = new Potion(i);
+	        potionsArray.push(newEnemy);
+	    }
+	    return potionsArray;
+	}
+
+	function populateMap(enemies) {
+	    for (var i = 0; i < enemies.length; i++) {
+	        enemies[i].draw();
+	    }
+	}
+
+	function clearItems(objArray) {
+	    for (var i = 0; i < objArray.length; i++) {
+
+	        if (objArray[i].remove !== undefine) {
+	            objArray.splice(i, 1);
+	        }
+	    }
+	    return objArray;
+	}
+
+	function paintWorld(worldRooms) {
+	    c_context.clearRect(0, 0, canvas.width, canvas.height);
+	    worldRooms.forEach(function (e) {
+	        e.paint(c_context);
+	    });
+	    draw_paths(c_context, container_tree);
+	}
+
+	function updateLocs() {
+	    viewRect.update();
+	}
+
+	function drawCanvas() {
+	    viewRect.draw();
+	    player.draw();
+	}
+
+	// handle sprite and player movement
+	function handleUpdate(e) {
+	    player.update();
+	    updateLocs();
+	    populateMap(enemiesArray);
+	    gameItems = clearItems(gameItems);
+	    paintWorld(rooms);
+	    updateUi(player);
+	    popItems(gameItems);
+	    drawCanvas();
+	}
+
+	function handleItems(weapons, potions, enemies) {
+	    var newArray = [];
+	    newArray = newArray.concat(potions).concat(weapons).concat(enemies);
+
+	    newArray.forEach(function (e) {
+	        return randomSpot(rooms, e);
+	    });
+	    return newArray;
+	}
+
+	function popItems(items) {
+
+	    function draw(obj) {
+	        c_context.drawImage(obj.img, obj.sourceX, obj.sourceY, obj.width, obj.height, obj.x, obj.y, obj.destWidth, obj.destHeight);
+	    }
+
+	    items.forEach(function (e) {
+	        return draw(e);
+	    });
+	}
+
+	function updateUi(player) {
+	    var health = 'Health: ' + player.health;
+	    var damage = 'Damage: ' + player.damage;
+	    var weapon = 'Weapon: ' + player.weapon;
+	    var level = 'Level: ' + player.level;
+	    var experience = 'Experience: ' + player.experience;
+
+	    var healthBar = document.querySelector('#health');
+	    var levelBar = document.querySelector('#level');
+	    var weaponBar = document.querySelector('#weapon');
+	    var damageBar = document.querySelector('#damage');
+	    var experienceBar = document.querySelector('#experience');
+
+	    healthBar.textContent = health;
+	    weaponBar.textContent = weapon;
+	    damageBar.textContent = damage;
+	    levelBar.textContent = level;
+	    experienceBar.textContent = experience;
+	}
+
+	function updateEnemyUI(enemy) {
+
+	    var health = 'Health: ' + enemy.health;
+	    var damage = 'Damage: ' + enemy.damage;
+
+	    var healthBar = document.querySelector('#eHealth');
+	    var damageBar = document.querySelector('#eDamage');
+
+	    if (enemy.health <= 0) {
+	        setTimeout(function () {
+	            clearEnemyUI(enemy);
+	        }, 1000);
+	    }
+
+	    healthBar.textContent = health;
+	    damageBar.textContent = damage;
+	}
+
+	function clearEnemyUI(enemy) {
+
+	    if (enemy.health <= 0) {
+	        enemy.health = 0;
+	    }
+	    var health = 'Health: ' + enemy.health;
+	    var damage = 'Damage: ' + enemy.damage;
+
+	    var healthBar = document.querySelector('#eHealth');
+	    var damageBar = document.querySelector('#eDamage');
+
+	    healthBar.textContent = health;
+	    damageBar.textContent = "Defeated!";
+	}
+
+	function changeDirection(e, player) {
+	    player.moving = true;
+	    switch (e) {
+	        case 37:
+	            // left arrow
+	            console.log("changeDir left");
+	            player.left = true;
+	            player.direction = "left";
+	            break;
+	        case 38:
+	            // up arrow
+	            console.log("changeDir up");
+	            player.up = true;
+	            player.direction = "up";
+	            break;
+	        case 39:
+	            // right arrow
+	            console.log("changeDir right");
+	            player.right = true;
+	            player.direction = "right";
+	            break;
+	        case 40:
+	            // down arrow
+	            console.log("changeDir down");
+	            player.down = true;
+	            player.direction = "down";
+	            break;
+	        default:
+	            return;
+	    }
+	}
+
+	function cancelDirection(e, player) {
+	    player.direction = false;
+	    player.moving = false;
+	    switch (e) {
+	        case 37:
+	            // left arrow
+	            player.left = false;
+	            break;
+	        case 38:
+	            // up arrow
+	            player.up = false;
+	            break;
+	        case 39:
+	            // right arrow
+	            player.right = false;
+	            break;
+	        case 40:
+	            // down arrow
+	            player.down = false;
+	            break;
+	        default:
+	            return;
+	    }
+	}
+
+	function startTheGame() {
+	    loadImages();
+	}
+
+/***/ },
+/* 274 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(28);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _utils = __webpack_require__(273);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var SQUARE = 1;
+
+	var Room = function () {
+	  function Room(container) {
+	    (0, _classCallCheck3.default)(this, Room);
+
+	    this.x = container.x + (0, _utils.random)(0, Math.floor(container.w / 3));
+	    this.y = container.y + (0, _utils.random)(0, Math.floor(container.h / 3));
+	    this.w = container.w - (this.x - container.x);
+	    this.h = container.h - (this.y - container.y);
+	    this.w -= (0, _utils.random)(0, this.w / 3);
+	    this.h -= (0, _utils.random)(0, this.w / 3);
+
+	    return this;
+	  }
+
+	  (0, _createClass3.default)(Room, [{
+	    key: 'paint',
+	    value: function paint(c) {
+	      c.fillStyle = "#888";
+	      c.fillRect(this.x * SQUARE, this.y * SQUARE, this.w * SQUARE, this.h * SQUARE);
+	    }
+	  }]);
+	  return Room;
+	}();
+
+	exports.default = Room;
+
+/***/ },
+/* 275 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(28);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _react = __webpack_require__(87);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Camera = function () {
+	    function Camera(canvas, theMap) {
+	        (0, _classCallCheck3.default)(this, Camera);
+
+
+	        this.x = 0;
+	        this.y = 0;
+
+	        this.xView = canvas.width;
+	        this.yView = canvas.height;
+
+	        this.centerX = this.xView / 2;
+	        this.centerY = this.yView / 2;
+
+	        // the deadzone
+	        this.deadZoneX = 0;
+	        this.deadZoneY = 0;
+
+	        // map dimensions
+	        this.worldW = theMap.map.leaf.w;
+	        this.worldH = theMap.map.leaf.h;
+	    }
+
+	    (0, _createClass3.default)(Camera, [{
+	        key: "follow",
+	        value: function follow(followObj) {
+	            this.follow = followObj;
+	        }
+	    }, {
+	        key: "update",
+	        value: function update() {
+	            console.log("updating");
+	            // Camera within the boundaries of the world map
+	            if (this.follow.x - this.centerX < 0) {
+	                this.x = 0;
+	            } else if (this.follow.x + this.centerX > this.worldW) {
+	                this.x = this.worldW - this.xView;
+	            } else {
+	                this.x = this.follow.x - this.centerX;
+	            }
+
+	            if (this.follow.y - this.centerY < 0) {
+	                this.y = 0;
+	            } else if (this.follow.y + this.centerY > this.worldH) {
+	                this.y = this.worldH - this.yView;
+	            } else {
+	                this.y = this.follow.y - this.centerY;
+	            }
+	        }
+	    }, {
+	        key: "draw",
+	        value: function draw(ctx, notTheMap) {
+	            // ctx.clearRect(0, 0, this.xView, this.yView);
+	            ctx.drawImage(notTheMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
+	        }
+	    }]);
+	    return Camera;
+	}(); /*
+	       Camera code based on Gustavo Carvalho on stack overflow
+	     
+	       http://stackoverflow.com/questions/16919601/html5-canvas-camera-viewport-how-to-actally-do-it
+	     */
+
+	exports.default = Camera;
+
+/***/ },
+/* 276 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(28);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	var _collision = __webpack_require__(278);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var Player = function () {
+	    function Player() {
+	        (0, _classCallCheck3.default)(this, Player);
+
+	        // source of img file
+	        this.img = new Image();
+	        this.img.src = 'img/Tuxedo.png';
+
+	        // source sprite from img.src
+	        this.sourceX = 10;
+	        this.sourceY = 10;
+	        this.sourceWidth = 15;
+	        this.sourceHeight = 15;
+	        // location to place on canvas
+
+	        this.x = 200;
+	        this.y = 200;
+
+	        this.destWidth = 20;
+	        this.destHeight = 20;
+
+	        // Combat Stats
+	        this.health = 100;
+
+	        this.maxHealth = 100;
+
+	        this.weapon = "Nunchucks";
+
+	        this.experience = 0;
+	        this.level = 1;
+
+	        this.baseDamage = 10;
+	        this.weaponDamage = 0;
+	        this.damage = 10;
+
+	        // movement
+
+	        this.left = false;
+	        this.right = false;
+	        this.up = false;
+	        this.down = false;
+	    }
+
+	    (0, _createClass3.default)(Player, [{
+	        key: 'update',
+	        value: function update(worldCtx, gameItems) {
+	            console.log(this, "does this have player.direction");
+	            if (!(0, _collision.checkContext)(worldCtx, this)) {
+	                return false;
+	            }
+	            console.log(this, "this");
+	            if ((0, _collision.compareLocations)(this, gameItems)) {
+	                if (this.left) {
+	                    this.x -= 10;
+	                    this.lastMove = "left";
+	                }
+	                if (this.right) {
+	                    this.x += 10;
+	                    this.lastMove = "right";
+	                }
+	                if (this.up) {
+	                    this.y -= 10;
+	                    this.lastMove = "up";
+	                }
+	                if (this.down) {
+	                    this.y += 10;
+	                    this.lastMove = "down";
+	                }
+	            } else if (!(0, _collision.compareLocations)(this, gameItems)) {
+	                if (this.lastMove === "left" && this.right) {
+	                    this.x += 10;
+	                } else if (this.lastMove === "right" && this.left) {
+	                    this.x -= 10;
+	                } else if (this.lastMove === "up" && this.down) {
+	                    this.y += 10;
+	                } else if (this.lastMove === "down" && this.up) {
+	                    this.y -= 10;
+	                }
+	            }
+	        }
+	    }, {
+	        key: 'draw',
+	        value: function draw(ctx, worldMap) {
+	            // Check to see whether player is in the deadZone
+	            this.xDeadZone = 375;
+	            this.yDeadZone = 375;
+
+	            var cameraX = void 0;
+	            var cameraY = void 0;
+
+	            if (this.x >= this.xDeadZone && this.x < worldMap.width - this.xDeadZone) {
+	                cameraX = this.xDeadZone;
+	            } else if (this.x > worldMap.width - this.xDeadZone) {
+	                cameraX = this.x - worldMap.width + this.xDeadZone * 2;
+	            } else {
+	                cameraX = this.x;
+	            }
+
+	            if (this.y >= this.yDeadZone && this.y < worldMap.height - this.yDeadZone) {
+	                cameraY = this.yDeadZone;
+	            } else if (this.y > worldMap.height - this.yDeadZone) {
+	                cameraY = this.y - worldMap.height + this.yDeadZone * 2;
+	            } else {
+	                cameraY = this.y;
+	            }
+
+	            ctx.drawImage(this.img, this.sourceY, this.sourceX, this.sourceWidth, this.sourceHeight, cameraX - this.destWidth / 2, cameraY - this.destHeight / 2, this.destWidth, this.destHeight);
+	        }
+	    }, {
+	        key: 'getLocation',
+	        value: function getLocation() {
+	            // list of all the rooms on the map
+	            var rooms = leafs;
+	            // picks a random room
+	            var randomLeaf = rooms[Math.floor(Math.random() * (leafs.length - 0) + 0)];
+
+	            // Check if room is full or not.
+	            //  if (checkRoomPop(randomLeaf)) {
+	            //    this.getLocation(rooms);
+	            //  }
+
+	            // take random location and assign it to local vars x and y;
+	            var newObj = findRandomSpot(randomLeaf);
+	            var x = newObj.x;
+	            var y = newObj.y;
+
+	            // check if either overlap and if not assign x and y to this or rerun function for new coords
+	            // if (this.checkOverlap(enemiesObj, x, y)) {
+	            this.x = x;
+	            this.y = y;
+	            //} else {
+	            //  this.getLocation();
+	            //}
+	        }
+	    }, {
+	        key: 'updateWeapon',
+	        value: function updateWeapon(object) {
+	            this.weapon = object.name;
+	            this.weaponDamage = object.damage;
+	            this.damage = this.baseDamage * this.level + this.weaponDamage;
+	            object.remove = true;
+	        }
+	    }, {
+	        key: 'fightEnemy',
+	        value: function fightEnemy(enemy) {
+	            this.health -= enemy.damage;
+	            enemy.combat(this);
+
+	            if (this.health <= 0) {
+	                this.lose();
+	            }
+	        }
+	    }, {
+	        key: 'updateHealth',
+	        value: function updateHealth(object) {
+	            if (this.health + object.health > this.maxHealth) {
+	                console.log(this.maxHealth, "maxHelath on pot updateHealth");
+	                this.health = this.maxHealth;
+	            } else {
+	                this.health += object.health;
+	            }
+
+	            object.remove = true;
+	        }
+	    }, {
+	        key: 'levelUp',
+	        value: function levelUp() {
+	            this.level++;
+	            this.maxHealth = 100 * (this.level / 2);
+	            this.experience = this.experience % 100;
+	            this.health = this.maxHealth;
+	        }
+	    }, {
+	        key: 'lose',
+	        value: function lose() {
+	            clearInterval(gameInt);
+	            alert("You have died, try again!");
+	            startTheGame();
+	        }
+	    }]);
+	    return Player;
+	}();
+
+	exports.default = Player;
+
+/***/ },
+/* 277 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _classCallCheck2 = __webpack_require__(27);
+
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+	var _createClass2 = __webpack_require__(28);
+
+	var _createClass3 = _interopRequireDefault(_createClass2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/*
+	    Sources of Images
+
+	    Tuxedo = http://opengameart.org/users/dezrasdragons
+	    ChestRed = http://opengameart.org/users/hippo
+	    Dragon = http://opengameart.org/content/dragon-pixel-art
+	    Earth019 (evil tree) = http://opengameart.org/users/emerald
+
+	*/
+
+	var playerImg = new Image();
+	var enemyImg = new Image();
+	var itemChest = new Image();
+	var pt1 = new Image();
+	var pt2 = new Image();
+	var pt3 = new Image();
+	var pt4 = new Image();
+	var dragon = new Image();
+
+	var ImageList = function () {
+	  function ImageList() {
+	    (0, _classCallCheck3.default)(this, ImageList);
+
+	    this.imageSrcs = ['img/Tuxedo.png', 'img/ChestRed.png', 'img/earth019.png', 'img/pt1.png', 'img/pt2.png', 'img/pt3.png', 'img/pt4.png', 'img/dragon.png'];
+	    this.imgList = [playerImg, enemyImg, itemChest, pt1, pt2, pt3, pt4, dragon];
+	    this.loadCount = 0;
+	  }
+
+	  (0, _createClass3.default)(ImageList, [{
+	    key: 'loadImages',
+	    value: function loadImages() {
+	      for (var i = 0; i < this.imgList.length; i++) {
+	        this.loadImage(this.imgList[i], this.imageSrcs[i]);
+	      }
+	    }
+	  }, {
+	    key: 'loadImage',
+	    value: function loadImage(img, src) {
+	      img.addEventListener('load', this.imageLoaded());
+	      img.src = src;
+	    }
+	  }, {
+	    key: 'imageLoaded',
+	    value: function imageLoaded() {
+	      this.loadCount++;
+	      if (this.loadCount === this.imgList.length) {
+	        this.startGame();
+	      }
+	    }
+	  }, {
+	    key: 'startGame',
+	    value: function startGame() {
+	      console.log("game started");
+	    }
+	  }]);
+	  return ImageList;
+	}();
+
+	exports.default = ImageList;
+
+/***/ },
+/* 278 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.checkContext = checkContext;
+	exports.compareLocations = compareLocations;
+	//==============================================================================
+	// World collision detection ==================================================
+	// =============================================================================
+
+
+	// Take the sprite coordinates and check for black pixels
+	function checkContext(ctx, player) {
+	  var centerX = Math.floor(player.x + player.destWidth / 2);
+	  var centerY = Math.floor(player.y + player.destHeight / 2);
+	  var imgObj = void 0;
+
+	  if (!player.moving) {
+	    console.log("player not moving");
+	    return;
+	  }
+
+	  if (player.left) {
+	    console.log("left");
+	    centerX -= 20;
+	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
+	  } else if (player.right) {
+	    console.log("right");
+	    centerX += 5;
+	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
+	  } else if (player.up) {
+	    console.log("up");
+	    centerY -= 30;
+	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
+	  } else if (player.down) {
+	    console.log("down");
+	    centerY += 5;
+	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
+	  }
+
+	  if (loopPixelData(imgObj)) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+	}
+
+	// loop over the object data array to see if there are any black pixels
+	function loopPixelData(obj) {
+	  for (var i = 0; i < obj.data.length; i += 4) {
+	    if (obj.data[i] === 136) {
+	      console.log("true");
+	      return true;
+	    } else if (obj.data[i] === 0) {
+	      console.log("false");
+	      return false;
+	    }
+	  }
+	  return true;
+	}
+
+	function compareLocations(player, objects, direction) {
+	  // loop over all the objects to see if the playerLoc clashes with any of the objects
+
+	  // make sure combat does not occur unless moving towards enemy
+	  if (player.moving === false) {
+	    return false;
+	  }
+	  for (var i = 0; i < objects.length; i++) {
+	    if (detectCollision(player, objects[i])) {
+	      console.log("collision detected, false");
+	      return false;
+	    }
+	  }
+	  console.log("true");
+	  return true;
+	}
+
+	function detectCollision(player, obj) {
+	  // Is the object x and y overlapping
+
+	  if (player.x >= obj.x && player.y >= obj.y && player.x <= obj.x + obj.destWidth && player.y <= obj.y + obj.destHeight || player.x + player.destWidth >= obj.x && player.y + player.destHeight >= obj.y && player.x + player.destWdith <= obj.x + obj.destWidth && player.y + player.destHeight <= obj.y + obj.destHeight) {
+	    console.log("handling collison", obj);
+	    handleCollision(player, obj);
+	    return true;
+	  } else {
+	    return false;
+	  }
+	}
+
+	function handleCollision(player, obj) {
+
+	  if (obj.constructor.name === "Enemy") {
+	    // run combat function
+	    return player.fightEnemy(obj);
+	  } else if (obj.constructor.name === "Weapon") {
+	    console.log("Weapon");
+	    // pick up weapon function
+	    return player.updateWeapon(obj);
+	  } else if (obj.constructor.name === "Potion") {
+	    console.log("Health");
+	    // update health
+	    return player.updateHealth(obj);
+	  } else if (obj.constructor.name === "Boss") {
+	    console.log("Health");
+	    // update health
+	    return player.fightEnemy(obj);
+	  }
+	}
+
+/***/ },
+/* 279 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	exports.__esModule = true;
+
+	var _assign = __webpack_require__(280);
+
+	var _assign2 = _interopRequireDefault(_assign);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _assign2.default || function (target) {
+	  for (var i = 1; i < arguments.length; i++) {
+	    var source = arguments[i];
+
+	    for (var key in source) {
+	      if (Object.prototype.hasOwnProperty.call(source, key)) {
+	        target[key] = source[key];
+	      }
+	    }
+	  }
+
+	  return target;
+	};
+
+/***/ },
+/* 280 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(281), __esModule: true };
+
+/***/ },
+/* 281 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(282);
+	module.exports = __webpack_require__(14).Object.assign;
+
+/***/ },
+/* 282 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.3.1 Object.assign(target, source)
+	var $export = __webpack_require__(13);
+
+	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(283)});
+
+/***/ },
+/* 283 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	// 19.1.2.1 Object.assign(target, source, ...)
+	var getKeys  = __webpack_require__(46)
+	  , gOPS     = __webpack_require__(70)
+	  , pIE      = __webpack_require__(71)
+	  , toObject = __webpack_require__(4)
+	  , IObject  = __webpack_require__(49)
+	  , $assign  = Object.assign;
+
+	// should work with symbols and should have deterministic property order (V8 bug)
+	module.exports = !$assign || __webpack_require__(23)(function(){
+	  var A = {}
+	    , B = {}
+	    , S = Symbol()
+	    , K = 'abcdefghijklmnopqrst';
+	  A[S] = 7;
+	  K.split('').forEach(function(k){ B[k] = k; });
+	  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
+	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
+	  var T     = toObject(target)
+	    , aLen  = arguments.length
+	    , index = 1
+	    , getSymbols = gOPS.f
+	    , isEnum     = pIE.f;
+	  while(aLen > index){
+	    var S      = IObject(arguments[index++])
+	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
+	      , length = keys.length
+	      , j      = 0
+	      , key;
+	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
+	  } return T;
+	} : $assign;
 
 /***/ }
 /******/ ]);
