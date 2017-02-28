@@ -1,5 +1,5 @@
 // Resource gathering  -  https://stackoverflow.com/questions/35261956/javascript-game-code-running-very-slow
-
+import {random} from '../utils/utils.js'
 /*
     Sources of Images
 
@@ -10,17 +10,39 @@
 
 */
 
-export class Enemy  {
+class Item {
 
-  constructor (key) {
+    draw (ctx) {
+      ctx.drawImage(this.img,
+          this.sourceX,
+          this.sourceY,
+          this.width,
+          this.height,
+          this.x,
+          this.y,
+          this.destWidth,
+          this.destHeight
+      );
+    }
+
+
+}
+
+
+
+
+
+export class Enemy extends Item {
+
+  constructor (props) {
+    super(props);
     this.img = new Image();
     this.img.src = "img/earth019.png";
 
-    this.key = key;
 
     // dimensions on the map
-    this.destWidth = 35;
-    this.destHeight = 35;
+    this.destWidth = 30;
+    this.destHeight = 30;
 
     // dimensions of the sprite on the png
     this.sourceX = 150;
@@ -33,31 +55,6 @@ export class Enemy  {
     this.experience = this.health / 4;
 
     this.damage = 10;
-  }
-
-  draw (ctx) {
-    c_context.drawImage(this.img,
-        this.sourceX,
-        this.sourceY,
-        this.width,
-        this.height,
-        this.x,
-        this.y,
-        this.destWidth,
-        this.destHeight
-    );
-  }
-
-  getLocation (leafs) {
-    let rooms = leafs;
-    let randomLeaf = rooms[Math.floor(Math.random() * (leafs.length - 0) + 0)];
-
-    let newObj = findRandomSpot(randomLeaf);
-    let x = newObj.x;
-    let y = newObj.y;
-
-    this.x = x;
-    this.y = y;
   }
 
   combat (player) {
@@ -76,9 +73,10 @@ export class Enemy  {
 
 }
 
-export class Weapon {
+export class Weapon extends Item {
 
-  constructor () {
+  constructor (props) {
+    super(props);
     var weaponsList = ["Dagger", "ShortSword", "BattleAxe", "Longsword", "Claymore", "Dual Swords", "Excalibur"]
 
     this.img = new Image();
@@ -93,12 +91,9 @@ export class Weapon {
     this.baseDamage = 10;
     this.damage = this.baseDamage * this.multiplier;
 
-    this.x = Math.floor(random(0, 2000));
-    this.y = Math.floor(random(0, 2000));
-
     // dimensions on the map
-    this.destWidth = 35;
-    this.destHeight = 35;
+    this.destWidth = 20;
+    this.destHeight = 20;
 
     // dimensions of the sprite on the png
     this.sourceX = 0;
@@ -110,8 +105,9 @@ export class Weapon {
 }
 
 
-export class Potion {
-  constructor () {
+export class Potion extends Item {
+  constructor (props) {
+    super(props);
     // Source of images from http://opengameart.org/users/rafaelchm
     this.img = new Image();
     this.img.src = "img/pt2.png"
@@ -141,26 +137,29 @@ export class Potion {
 
   }
 
-    // dimensions on the map
-    this.destWidth = 35;
-    this.destHeight = 35;
+      // dimensions on the map
+      this.destWidth = 20;
+      this.destHeight = 20;
 
-    // dimensions of the sprite on the png
-    this.sourceX = 0;
-    this.sourceY = 0;
-    this.width = 375;
-    this.height = 375;
+      // dimensions of the sprite on the png
+      this.sourceX = 0;
+      this.sourceY = 0;
+      this.width = 375;
+      this.height = 375;
+  }
 }
 
-class Boss extends Enemy {
+export class Boss extends Item {
 
-  constructor () {
+  constructor (props) {
+    super(props);
+
     this.img = new Image();
     this.img.src = "img/dragon.png";
 
     // dimensions on the map
-    this.destWidth = 35;
-    this.destHeight = 35;
+    this.destWidth = 30;
+    this.destHeight = 30;
 
     // dimensions of the sprite on the png
     this.sourceX = 0;
@@ -173,19 +172,6 @@ class Boss extends Enemy {
     this.experience = this.health / 4;
 
     this.damage = 10;
-  }
-
-  draw () {
-    c_context.drawImage(this.img,
-        this.sourceX,
-        this.sourceY,
-        this.width,
-        this.height,
-        this.x,
-        this.y,
-        this.destWidth,
-        this.destHeight
-    );
   }
 
   combat (player) {

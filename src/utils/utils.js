@@ -1,11 +1,10 @@
+
 function Point(x, y) {
     this.x = x;
     this.y = y;
 }
 
-export function random(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
+
 
 function Container(x, y, w, h) {
     this.x = x;
@@ -41,83 +40,55 @@ function checkOverlap(object, x, y) {
     return true;
 }
 
+export function populateRooms (rooms, Enemy, Potion, Weapon, Boss) {
 
-function randomSpot(leafs, object) {
+  let mapObj = [];
+  let bossRoom = random(0, rooms.length);
 
-    let rooms = leafs;
-    let randomLeaf = rooms[Math.floor(Math.random() * (leafs.length - 0) + 0)]
+  for (let i = 0; i < rooms.length; i++) {
+    mapObj = mapObj.concat(createObjects(Enemy, 1, 5, rooms[i]))
+    .concat(createObjects(Potion, 0, 2, rooms[i]))
+    .concat(createObjects(Weapon, 0, 1, rooms[i]));
 
-    let newObj = findRandomSpot(randomLeaf);
-    let x = newObj.x;
-    let y = newObj.y;
+    if (i === bossRoom) {
+        let boss = new Boss();
+        boss.room = rooms[i];
+        mapObj.push(boss);
+    }
+  }
+  getItemLocations(mapObj);
+  console.log(mapObj, "this is mapObj");
+  return mapObj
+};
 
-    object.x = x;
-    object.y = y;
+
+function createObjects (object, min, max, room) {
+  let objArray = [];
+  let num = random(min, max);
+
+  for (let i = 0; i < num; i++) {
+    let newObj = new object();
+    newObj.room = room;
+    objArray.push(newObj);
+  }
+    return objArray;
 }
 
-function findRandomSpot(leaf) {
+// cycle through all the objects, and pick a random location for each object based off its this.room data
+function getItemLocations (objects) {
+  for (var i = 0; i < objects.length; i++) {
+    getRandomLocation(objects[i]);
+  }
+  return;
+}
+
+
+function getRandomLocation(object) {
 
     // takes a random location in the room minus 40px for sprite width & height
-    this.x = random(leaf.x +40, (leaf.x + leaf.w) - 40);
-    this.y = random(leaf.y +40, (leaf.y + leaf.h) - 40);
-
-    return this;
-}
-
-
-function createEnemies(min, max) {
-
-    let minEnemies = min;
-    let maxEnemies = max;
-
-    let enemies = Math.random() * (max - min) + min;
-    let enemiesArray = [];
-
-    for (let i = 0; i < enemies; i++) {
-        let newEnemy = new Enemy(i);
-        enemiesArray.push(newEnemy);
-    }
-
-    let boss = new Boss();
-    enemiesArray.push(boss);
-
-    return enemiesArray;
-}
-
-function createWeapons(min, max) {
-
-    let minEnemies = min;
-    let maxEnemies = max;
-
-    let enemies = Math.random() * (max - min) + min;
-    let weaponsArray = [];
-
-    for (let i = 0; i < enemies; i++) {
-        let newWeapon = new Weapon(i);
-        weaponsArray.push(newWeapon);
-    }
-    return weaponsArray;
-}
-
-function createPotions(min, max) {
-
-    let minEnemies = min;
-    let maxEnemies = max;
-
-    let enemies = Math.random() * (max - min) + min;
-    let potionsArray = [];
-
-    for (let i = 0; i < enemies; i++) {
-        let newEnemy = new Potion(i);
-        potionsArray.push(newEnemy);
-    }
-    return potionsArray;
-}
-
-function populateMap(enemies) {
-    for (let i = 0; i < enemies.length; i++) {
-        enemies[i].draw();
-    }
+    object.x = random(object.room.x +20, (object.room.x + object.room.w) - 40);
+    object.y = random(object.room.y +20, (object.room.y + object.room.h) - 40);
+    return;
 }
 
 
@@ -301,3 +272,8 @@ export function cancelDirection (e, player) {
   function startTheGame () {
     loadImages();
   }
+
+
+export function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}

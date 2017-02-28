@@ -80,7 +80,7 @@ class Canvas extends React.Component {
       this.setState(newState, function () {
         setInterval(() => {
           this.updateMap(this.state.worldMap.canvas.getContext('2d'), []);
-        }, 100);
+        }, 200);
         return;
       });
       // store intervalId in the state so it can be accessed later:
@@ -96,6 +96,7 @@ class Canvas extends React.Component {
     const drawNewCanvas = this.refs.canvas;
     const ctx = drawNewCanvas.getContext('2d');
     ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
+    this.state.worldMap.drawObjects(this.state.worldMap.canvas);
     this.state.camera.draw(ctx, this.state.worldMap.canvas);
     this.state.player.draw(ctx, this.state.worldMap.canvas);
   }

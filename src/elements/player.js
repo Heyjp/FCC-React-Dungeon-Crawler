@@ -45,7 +45,6 @@ export default class Player  {
   }
 
   update (worldCtx, gameItems) {
-    console.log(this, "does this have player.direction")
     if (!checkContext(worldCtx, this)) {
       return false
     }

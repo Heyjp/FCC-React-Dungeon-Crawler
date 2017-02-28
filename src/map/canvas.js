@@ -4,10 +4,9 @@ import Tree from './tree.js';
 import {split_container, random_split} from './room-builder.js';
 import Room from './room.js'
 
+import {populateRooms} from '../utils/utils.js';
+import {Enemy, Potion, Weapon, Boss} from '../elements/objects.js';
 
-const canvas = document.createElement('canvas');
-
-const c_context = canvas.getContext('2d');
 
 const MAP_SIZE = 2000;
 const SQUARE = 1;
@@ -35,7 +34,18 @@ export default class WorldMap {
     canvas.height = MAP_SIZE;
 
     this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d');
+
+    this.objects = populateRooms(this.rooms, Enemy, Potion, Weapon, Boss);
   }
+
+  drawObjects () {
+    const ctx = this.ctx;
+    this.objects.forEach(function (e) {
+      e.draw(ctx);
+    })
+  }
+
 }
 
 
@@ -46,29 +56,9 @@ export default class WorldMap {
     2.2) cycle through each room - create the alotted objects and get a random location
     2.3) when a location is added check to see if it overlaps with the previous objects, if so rerandom the location
     2.4) when the list of objects is finalized for that room, concat with larger array of all the objects on map
-    2.5) exit once all the rooms are completed 
-
-
-
+    2.5) exit once all the rooms are completed
 
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 
