@@ -10,23 +10,22 @@ import React from 'react';
 export default class Camera  {
 
   constructor (canvas, theMap) {
-
+    console.log(canvas, theMap, "canvas and theMap");
     this.x = 0;
     this.y = 0
 
-    this.xView = canvas.width;
-    this.yView = canvas.height;
+    this.xView = 750;
+    this.yView = 750;
 
     this.centerX = this.xView / 2;
     this.centerY = this.yView / 2;
 
     // the deadzone
-    this.deadZoneX = 0;
     this.deadZoneY = 0;
 
     // map dimensions
-    this.worldW = theMap.map.leaf.w;
-    this.worldH = theMap.map.leaf.h;
+    this.worldW = theMap.width;
+    this.worldH = theMap.height;
   }
 
   follow (followObj) {
@@ -53,8 +52,8 @@ export default class Camera  {
     }
   }
 
-  draw (ctx, notTheMap) {
+  draw (ctx, theMap) {
     // ctx.clearRect(0, 0, this.xView, this.yView);
-    ctx.drawImage(notTheMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
+    ctx.drawImage(theMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
   }
 }

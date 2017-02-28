@@ -8,6 +8,9 @@
 
 */
 
+// Resource gathering  -  https://stackoverflow.com/questions/35261956/javascript-game-code-running-very-slow
+
+
 const playerImg = new Image();
 const enemyImg = new Image();
 const itemChest = new Image();

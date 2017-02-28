@@ -46,10 +46,6 @@
 
 	'use strict';
 
-	var _extends2 = __webpack_require__(1);
-
-	var _extends3 = _interopRequireDefault(_extends2);
-
 	var _getPrototypeOf = __webpack_require__(39);
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -104,27 +100,28 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Canvas = function (_React$Component) {
-	  (0, _inherits3.default)(Canvas, _React$Component);
+	var Map = function (_React$Component) {
+	  (0, _inherits3.default)(Map, _React$Component);
 
-	  function Canvas(props) {
-	    (0, _classCallCheck3.default)(this, Canvas);
+	  function Map(props) {
+	    (0, _classCallCheck3.default)(this, Map);
 
-	    var _this = (0, _possibleConstructorReturn3.default)(this, (Canvas.__proto__ || (0, _getPrototypeOf2.default)(Canvas)).call(this, props));
+	    var _this = (0, _possibleConstructorReturn3.default)(this, (Map.__proto__ || (0, _getPrototypeOf2.default)(Map)).call(this, props));
 
 	    _this.state = {
 	      worldMap: new _canvas2.default(),
-	      player: new _player2.default()
+	      player: new _player2.default(),
+	      Images: new _images2.default()
 	    };
 	    return _this;
 	  }
 
-	  (0, _createClass3.default)(Canvas, [{
+	  (0, _createClass3.default)(Map, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
+	      this.state.Images.loadImages();
 	      this.drawCanvas();
 	      this.setBackupCanvas();
-	      this.setCamera();
 	      this.startGameLoop();
 	    }
 	  }, {
@@ -163,37 +160,17 @@
 	      });
 	    }
 	  }, {
-	    key: 'setCamera',
-	    value: function setCamera() {
-	      var canvas = this.refs.canvas;
-	      var ctx = this.refs.canvas.getContext('2d');
-
-	      var camera = new _camera2.default(this.refs.canvas, this.state.worldMap);
-	      camera.follow(this.state.player);
-
-	      camera.draw(ctx, this.state.worldMap.canvas);
-
-	      var newState = (0, _extends3.default)({}, this.state);
-	      newState.camera = camera;
-
-	      // this.setState creates a pending state update, can write a cb to update you when the state has been updated
-	      this.setState(newState, function () {
-	        console.log("starting game");
-	      });
-	      // store intervalId in the state so it can be accessed later:
-	    }
-	  }, {
 	    key: 'startGameLoop',
 	    value: function startGameLoop() {
 	      var _this2 = this;
 
 	      var interval = setInterval(function () {
 	        _this2.updateMap(_this2.state.worldMap.canvas.getContext('2d'), _this2.state.worldMap.objects);
-	      }, 200);
+	      }, 100);
 
-	      this.setState((0, _extends3.default)({}, this.state, {
+	      this.setState({
 	        interval: interval
-	      }));
+	      });
 	    }
 	  }, {
 	    key: 'stopGameLoop',
@@ -207,34 +184,28 @@
 	    key: 'updateMap',
 	    value: function updateMap(ctx, gameItems) {
 	      (0, _utils.clearItems)(this.state.worldMap.objects);
+
 	      this.state.player.update(ctx, gameItems);
-	      this.state.camera.update();
-	      this.drawNewMap();
-
-	      console.log(this.state.worldMap.objects.length, "this is object length");
-	    }
-	  }, {
-	    key: 'drawNewMap',
-	    value: function drawNewMap() {
-	      var drawNewCanvas = this.refs.canvas;
-	      var ctx = drawNewCanvas.getContext('2d');
-	      ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
-	      this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
-
 	      var backupCanvas = this.state.backupWorldMap;
-	      this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 
+	      this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
+	      this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 	      this.state.worldMap.drawObjects(this.state.worldMap.canvas);
-	      this.state.camera.draw(ctx, this.state.worldMap.canvas);
-	      this.state.player.draw(ctx, this.state.worldMap.canvas);
+
+	      console.log(this.state.worldMap, "this is worldMap");
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      return _react2.default.createElement('canvas', { tabIndex: '0', onKeyUp: this.handleKeyUp.bind(this), onKeyDown: this.handleKeyDown.bind(this), ref: 'canvas', width: this.props.width, height: this.props.height });
+	      return _react2.default.createElement(
+	        'div',
+	        { tabIndex: '0', className: 'game-container', onKeyUp: this.handleKeyUp.bind(this), onKeyDown: this.handleKeyDown.bind(this) },
+	        _react2.default.createElement(Legend, { player: this.state.player }),
+	        _react2.default.createElement(Canvas, { worldMap: this.state.worldMap.canvas, player: this.state.player, width: '750', height: '750' })
+	      );
 	    }
 	  }]);
-	  return Canvas;
+	  return Map;
 	}(_react2.default.Component);
 
 	var Legend = function (_React$Component2) {
@@ -359,94 +330,75 @@
 	  return Legend;
 	}(_react2.default.Component);
 
-	var Map = function (_React$Component3) {
-	  (0, _inherits3.default)(Map, _React$Component3);
+	var Canvas = function (_React$Component3) {
+	  (0, _inherits3.default)(Canvas, _React$Component3);
 
-	  function Map(props) {
-	    (0, _classCallCheck3.default)(this, Map);
+	  function Canvas(props) {
+	    (0, _classCallCheck3.default)(this, Canvas);
 
-	    var _this4 = (0, _possibleConstructorReturn3.default)(this, (Map.__proto__ || (0, _getPrototypeOf2.default)(Map)).call(this, props));
+	    var _this4 = (0, _possibleConstructorReturn3.default)(this, (Canvas.__proto__ || (0, _getPrototypeOf2.default)(Canvas)).call(this, props));
 
 	    _this4.state = {
-	      Images: new _images2.default()
+	      camera: new _camera2.default(_this4.refs.canvas, _this4.props.worldMap)
 	    };
-
 	    return _this4;
 	  }
 
-	  (0, _createClass3.default)(Map, [{
+	  (0, _createClass3.default)(Canvas, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      this.state.Images.loadImages();
-	      console.log("Mounted!!!");
+	      this.setCamera();
+	    }
+	  }, {
+	    key: 'setCamera',
+	    value: function setCamera() {
+	      console.log("setting camera");
+	      var canvas = this.refs.canvas;
+	      var ctx = this.refs.canvas.getContext('2d');
+
+	      this.state.camera.follow(this.props.player);
+	      this.state.camera.update();
+	      this.state.camera.draw(ctx, this.props.worldMap);
+	    }
+	  }, {
+	    key: 'componentWillReceiveProps',
+	    value: function componentWillReceiveProps() {
+	      this.drawNewMap();
+	      console.log("received props");
+
+	      setInterval(function () {
+	        this.drawNewMap();
+	      }.bind(this), 100);
+	    }
+	  }, {
+	    key: 'drawNewMap',
+	    value: function drawNewMap() {
+	      this.state.camera.update();
+	      var canvas = this.refs.canvas;
+	      canvas.width = 750;
+	      canvas.height = 750;
+	      var ctx = canvas.getContext('2d');
+
+	      ctx.clearRect(0, 0, canvas.width, canvas.height);
+	      this.state.camera.draw(ctx, this.props.worldMap);
+	      this.props.player.draw(ctx, this.props.worldMap);
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'game-container' },
-	        _react2.default.createElement(Legend, null),
-	        _react2.default.createElement(Canvas, { width: '750', height: '750' })
-	      );
+	      return _react2.default.createElement('canvas', { ref: 'canvas', width: '750', height: '750' });
 	    }
 	  }]);
-	  return Map;
+	  return Canvas;
 	}(_react2.default.Component);
 
 	_reactDom2.default.render(_react2.default.createElement(Map, null), document.getElementById('root'));
 
 /***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	exports.__esModule = true;
-
-	var _assign = __webpack_require__(2);
-
-	var _assign2 = _interopRequireDefault(_assign);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	exports.default = _assign2.default || function (target) {
-	  for (var i = 1; i < arguments.length; i++) {
-	    var source = arguments[i];
-
-	    for (var key in source) {
-	      if (Object.prototype.hasOwnProperty.call(source, key)) {
-	        target[key] = source[key];
-	      }
-	    }
-	  }
-
-	  return target;
-	};
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(3), __esModule: true };
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(4);
-	module.exports = __webpack_require__(7).Object.assign;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.3.1 Object.assign(target, source)
-	var $export = __webpack_require__(5);
-
-	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(20)});
-
-/***/ },
+/* 1 */,
+/* 2 */,
+/* 3 */,
+/* 4 */,
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -686,44 +638,7 @@
 	};
 
 /***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	// 19.1.2.1 Object.assign(target, source, ...)
-	var getKeys  = __webpack_require__(21)
-	  , gOPS     = __webpack_require__(36)
-	  , pIE      = __webpack_require__(37)
-	  , toObject = __webpack_require__(38)
-	  , IObject  = __webpack_require__(25)
-	  , $assign  = Object.assign;
-
-	// should work with symbols and should have deterministic property order (V8 bug)
-	module.exports = !$assign || __webpack_require__(16)(function(){
-	  var A = {}
-	    , B = {}
-	    , S = Symbol()
-	    , K = 'abcdefghijklmnopqrst';
-	  A[S] = 7;
-	  K.split('').forEach(function(k){ B[k] = k; });
-	  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
-	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
-	  var T     = toObject(target)
-	    , aLen  = arguments.length
-	    , index = 1
-	    , getSymbols = gOPS.f
-	    , isEnum     = pIE.f;
-	  while(aLen > index){
-	    var S      = IObject(arguments[index++])
-	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
-	      , length = keys.length
-	      , j      = 0
-	      , key;
-	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
-	  } return T;
-	} : $assign;
-
-/***/ },
+/* 20 */,
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -24715,23 +24630,22 @@
 	    function Camera(canvas, theMap) {
 	        (0, _classCallCheck3.default)(this, Camera);
 
-
+	        console.log(canvas, theMap, "canvas and theMap");
 	        this.x = 0;
 	        this.y = 0;
 
-	        this.xView = canvas.width;
-	        this.yView = canvas.height;
+	        this.xView = 750;
+	        this.yView = 750;
 
 	        this.centerX = this.xView / 2;
 	        this.centerY = this.yView / 2;
 
 	        // the deadzone
-	        this.deadZoneX = 0;
 	        this.deadZoneY = 0;
 
 	        // map dimensions
-	        this.worldW = theMap.map.leaf.w;
-	        this.worldH = theMap.map.leaf.h;
+	        this.worldW = theMap.width;
+	        this.worldH = theMap.height;
 	    }
 
 	    (0, _createClass3.default)(Camera, [{
@@ -24762,9 +24676,9 @@
 	        }
 	    }, {
 	        key: "draw",
-	        value: function draw(ctx, notTheMap) {
+	        value: function draw(ctx, theMap) {
 	            // ctx.clearRect(0, 0, this.xView, this.yView);
-	            ctx.drawImage(notTheMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
+	            ctx.drawImage(theMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
 	        }
 	    }]);
 	    return Camera;
@@ -25118,6 +25032,9 @@
 	    Earth019 (evil tree) = http://opengameart.org/users/emerald
 
 	*/
+
+	// Resource gathering  -  https://stackoverflow.com/questions/35261956/javascript-game-code-running-very-slow
+
 
 	var playerImg = new Image();
 	var enemyImg = new Image();

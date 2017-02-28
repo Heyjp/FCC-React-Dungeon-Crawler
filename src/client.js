@@ -15,21 +15,22 @@ import {changeDirection, cancelDirection, clearItems} from './utils/utils.js'
 
 
 
-class Canvas extends React.Component {
+class Map extends React.Component {
 
   constructor (props) {
     super(props);
 
     this.state = {
       worldMap: new WorldMap(),
-      player: new Player()
+      player: new Player(),
+      Images: new ImageList()
     }
   }
 
   componentDidMount() {
+    this.state.Images.loadImages();
     this.drawCanvas();
     this.setBackupCanvas();
-    this.setCamera();
     this.startGameLoop()
   }
 
@@ -65,32 +66,14 @@ class Canvas extends React.Component {
     })
   }
 
-  setCamera () {
-      const canvas = this.refs.canvas;
-      const ctx = this.refs.canvas.getContext('2d');
 
-      let camera = new Camera(this.refs.canvas, this.state.worldMap);
-      camera.follow(this.state.player);
-
-      camera.draw(ctx, this.state.worldMap.canvas);
-
-      const newState = {...this.state};
-      newState.camera = camera;
-
-      // this.setState creates a pending state update, can write a cb to update you when the state has been updated
-      this.setState(newState, function () {
-        console.log("starting game");
-      });
-      // store intervalId in the state so it can be accessed later:
-  }
 
   startGameLoop () {
     var interval = setInterval(() => {
       this.updateMap(this.state.worldMap.canvas.getContext('2d'), this.state.worldMap.objects);
-    }, 200);
+    }, 100);
 
     this.setState({
-      ...this.state,
       interval
     });
   }
@@ -102,33 +85,28 @@ class Canvas extends React.Component {
     })
 
   }
+
   updateMap (ctx, gameItems) {
     clearItems(this.state.worldMap.objects)
+
     this.state.player.update(ctx, gameItems);
-    this.state.camera.update();
-    this.drawNewMap();
-
-    console.log(this.state.worldMap.objects.length, "this is object length");
-  }
-
-  drawNewMap () {
-    const drawNewCanvas = this.refs.canvas;
-    const ctx = drawNewCanvas.getContext('2d');
-    ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
-    this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
-
     const backupCanvas = this.state.backupWorldMap
-    this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 
+    this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
+    this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
     this.state.worldMap.drawObjects(this.state.worldMap.canvas);
-    this.state.camera.draw(ctx, this.state.worldMap.canvas);
-    this.state.player.draw(ctx, this.state.worldMap.canvas);
+
+    console.log(this.state.worldMap, "this is worldMap");
+
   }
 
-  render() {
-      return (
-        <canvas tabIndex="0" onKeyUp={this.handleKeyUp.bind(this)} onKeyDown={this.handleKeyDown.bind(this)} ref="canvas" width={this.props.width} height={this.props.height}></canvas>
-      )
+  render () {
+    return (
+      <div  tabIndex="0" className="game-container" onKeyUp={this.handleKeyUp.bind(this)} onKeyDown={this.handleKeyDown.bind(this)}>
+        <Legend player={this.state.player} />
+        <Canvas worldMap={this.state.worldMap.canvas} player={this.state.player}  width="750" height="750"  />
+      </div>
+    );
   }
 }
 
@@ -168,30 +146,60 @@ class Legend extends React.Component {
   }
 }
 
-class Map extends React.Component {
+class Canvas extends React.Component {
   constructor (props) {
     super(props);
 
     this.state = {
-     Images: new ImageList()
+      camera: new Camera(this.refs.canvas, this.props.worldMap)
     }
-
   }
 
   componentDidMount () {
-    this.state.Images.loadImages();
-    console.log("Mounted!!!");
+    this.setCamera();
   }
 
-  render () {
-    return (
-      <div className="game-container">
-        <Legend />
-        <Canvas width="750" height="750" />
-      </div>
-    );
+  setCamera () {
+      console.log("setting camera");
+      const canvas = this.refs.canvas;
+      const ctx = this.refs.canvas.getContext('2d');
+
+      this.state.camera.follow(this.props.player);
+      this.state.camera.update();
+      this.state.camera.draw(ctx, this.props.worldMap);
+
   }
+
+  componentWillReceiveProps() {
+    this.drawNewMap();
+    console.log("received props");
+
+    setInterval(function() {
+      this.drawNewMap();
+    }.bind(this), 100);
+  }
+
+  drawNewMap () {
+    this.state.camera.update();
+    const canvas = this.refs.canvas;
+    canvas.width = 750;
+    canvas.height = 750;
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.state.camera.draw(ctx, this.props.worldMap);
+    this.props.player.draw(ctx, this.props.worldMap);
+
+  }
+
+  render() {
+      return (
+        <canvas ref="canvas" width="750" height="750"></canvas>
+      )
+  }
+
 }
+
 
 ReactDOM.render(
   <Map />,
