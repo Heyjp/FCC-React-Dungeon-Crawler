@@ -29,11 +29,9 @@ export default class WorldMap {
     this.map = container_tree;
     this.rooms = roomArray;
 
-    let canvas = document.createElement('canvas');
-    canvas.width = MAP_SIZE;
-    canvas.height = MAP_SIZE;
-
-    this.canvas = canvas;
+    this.canvas = document.createElement('canvas');
+    this.canvas.width = MAP_SIZE;
+    this.canvas.height = MAP_SIZE;
     this.ctx = this.canvas.getContext('2d');
 
     this.objects = populateRooms(this.rooms, Enemy, Potion, Weapon, Boss);

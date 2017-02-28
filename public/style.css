@@ -17,3 +17,14 @@ body {background-color: black; padding: 0px; margin: 0px; overflow: hidden;}
 canvas {
   border: 2px solid white;
 }
+
+img {
+  width: 20px;
+  height: 20px;
+}
+
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

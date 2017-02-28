@@ -125,6 +125,7 @@
 	      this.drawCanvas();
 	      this.setBackupCanvas();
 	      this.setCamera();
+	      this.startGameLoop();
 	    }
 	  }, {
 	    key: 'drawCanvas',
@@ -177,14 +178,30 @@
 
 	      // this.setState creates a pending state update, can write a cb to update you when the state has been updated
 	      this.setState(newState, function () {
-	        var _this2 = this;
-
-	        setInterval(function () {
-	          _this2.updateMap(_this2.state.worldMap.canvas.getContext('2d'), _this2.state.worldMap.objects);
-	        }, 200);
-	        return;
+	        console.log("starting game");
 	      });
 	      // store intervalId in the state so it can be accessed later:
+	    }
+	  }, {
+	    key: 'startGameLoop',
+	    value: function startGameLoop() {
+	      var _this2 = this;
+
+	      var interval = setInterval(function () {
+	        _this2.updateMap(_this2.state.worldMap.canvas.getContext('2d'), _this2.state.worldMap.objects);
+	      }, 200);
+
+	      this.setState((0, _extends3.default)({}, this.state, {
+	        interval: interval
+	      }));
+	    }
+	  }, {
+	    key: 'stopGameLoop',
+	    value: function stopGameLoop() {
+	      this.state.interval = clearInterval(interval);
+	      this.setState({
+	        interval: clearInterval(interval)
+	      });
 	    }
 	  }, {
 	    key: 'updateMap',
@@ -203,8 +220,8 @@
 	      var ctx = drawNewCanvas.getContext('2d');
 	      ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
 	      this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
+
 	      var backupCanvas = this.state.backupWorldMap;
-	      var backupCtx = backupCanvas.getContext('2d');
 	      this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 
 	      this.state.worldMap.drawObjects(this.state.worldMap.canvas);
@@ -368,7 +385,8 @@
 	    value: function render() {
 	      return _react2.default.createElement(
 	        'div',
-	        null,
+	        { className: 'game-container' },
+	        _react2.default.createElement(Legend, null),
 	        _react2.default.createElement(Canvas, { width: '750', height: '750' })
 	      );
 	    }
@@ -377,17 +395,6 @@
 	}(_react2.default.Component);
 
 	_reactDom2.default.render(_react2.default.createElement(Map, null), document.getElementById('root'));
-
-	/*
-	<div>
-	  <h3>Roguelike Dungeon Crawler by HeyJP </h3>
-	  <div className="map-container">
-	    <Legend />
-	    <Canvas />
-	  </div>
-	</div>
-
-	*/
 
 /***/ },
 /* 1 */
@@ -23802,11 +23809,9 @@
 	        this.map = container_tree;
 	        this.rooms = roomArray;
 
-	        var canvas = document.createElement('canvas');
-	        canvas.width = MAP_SIZE;
-	        canvas.height = MAP_SIZE;
-
-	        this.canvas = canvas;
+	        this.canvas = document.createElement('canvas');
+	        this.canvas.width = MAP_SIZE;
+	        this.canvas.height = MAP_SIZE;
 	        this.ctx = this.canvas.getContext('2d');
 
 	        this.objects = (0, _utils.populateRooms)(this.rooms, _objects.Enemy, _objects.Potion, _objects.Weapon, _objects.Boss);

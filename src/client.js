@@ -30,7 +30,7 @@ class Canvas extends React.Component {
     this.drawCanvas();
     this.setBackupCanvas();
     this.setCamera();
-
+    this.startGameLoop()
   }
 
   drawCanvas () {
@@ -79,14 +79,29 @@ class Canvas extends React.Component {
 
       // this.setState creates a pending state update, can write a cb to update you when the state has been updated
       this.setState(newState, function () {
-        setInterval(() => {
-          this.updateMap(this.state.worldMap.canvas.getContext('2d'), this.state.worldMap.objects);
-        }, 200);
-        return;
+        console.log("starting game");
       });
       // store intervalId in the state so it can be accessed later:
   }
 
+  startGameLoop () {
+    var interval = setInterval(() => {
+      this.updateMap(this.state.worldMap.canvas.getContext('2d'), this.state.worldMap.objects);
+    }, 200);
+
+    this.setState({
+      ...this.state,
+      interval
+    });
+  }
+
+  stopGameLoop () {
+    this.state.interval = clearInterval(interval);
+    this.setState({
+      interval: clearInterval(interval)
+    })
+
+  }
   updateMap (ctx, gameItems) {
     clearItems(this.state.worldMap.objects)
     this.state.player.update(ctx, gameItems);
@@ -101,10 +116,9 @@ class Canvas extends React.Component {
     const ctx = drawNewCanvas.getContext('2d');
     ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
     this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
-    const backupCanvas = this.state.backupWorldMap
-    const backupCtx = backupCanvas.getContext('2d');
-    this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 
+    const backupCanvas = this.state.backupWorldMap
+    this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 
     this.state.worldMap.drawObjects(this.state.worldMap.canvas);
     this.state.camera.draw(ctx, this.state.worldMap.canvas);
@@ -171,7 +185,8 @@ class Map extends React.Component {
 
   render () {
     return (
-      <div>
+      <div className="game-container">
+        <Legend />
         <Canvas width="750" height="750" />
       </div>
     );
@@ -182,14 +197,3 @@ ReactDOM.render(
   <Map />,
   document.getElementById('root')
 );
-
-/*
-<div>
-  <h3>Roguelike Dungeon Crawler by HeyJP </h3>
-  <div className="map-container">
-    <Legend />
-    <Canvas />
-  </div>
-</div>
-
-*/
