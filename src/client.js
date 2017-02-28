@@ -11,7 +11,7 @@ import Player from './elements/player.js';
 
 import ImageList from './elements/images.js';
 
-import {changeDirection, cancelDirection} from './utils/utils.js'
+import {changeDirection, cancelDirection, clearItems} from './utils/utils.js'
 
 
 
@@ -56,6 +56,7 @@ class Canvas extends React.Component {
     let backupCanvas = document.createElement('canvas');
     backupCanvas.width = 2000;
     backupCanvas.height = 2000;
+
     let backupCtx = backupCanvas.getContext('2d');
     backupCtx.drawImage(this.state.worldMap.canvas, 0, 0);
 
@@ -79,7 +80,7 @@ class Canvas extends React.Component {
       // this.setState creates a pending state update, can write a cb to update you when the state has been updated
       this.setState(newState, function () {
         setInterval(() => {
-          this.updateMap(this.state.worldMap.canvas.getContext('2d'), []);
+          this.updateMap(this.state.worldMap.canvas.getContext('2d'), this.state.worldMap.objects);
         }, 200);
         return;
       });
@@ -87,15 +88,24 @@ class Canvas extends React.Component {
   }
 
   updateMap (ctx, gameItems) {
+    clearItems(this.state.worldMap.objects)
     this.state.player.update(ctx, gameItems);
     this.state.camera.update();
     this.drawNewMap();
+
+    console.log(this.state.worldMap.objects.length, "this is object length");
   }
 
   drawNewMap () {
     const drawNewCanvas = this.refs.canvas;
     const ctx = drawNewCanvas.getContext('2d');
     ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
+    this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
+    const backupCanvas = this.state.backupWorldMap
+    const backupCtx = backupCanvas.getContext('2d');
+    this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
+
+
     this.state.worldMap.drawObjects(this.state.worldMap.canvas);
     this.state.camera.draw(ctx, this.state.worldMap.canvas);
     this.state.player.draw(ctx, this.state.worldMap.canvas);

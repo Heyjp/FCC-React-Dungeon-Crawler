@@ -10,24 +10,19 @@ export function checkContext(ctx, player) {
   let imgObj;
 
   if (!player.moving) {
-    console.log("player not moving");
     return;
   }
 
   if (player.left) {
-    console.log("left");
     centerX -= 20;
     imgObj = ctx.getImageData(centerX, centerY, 1, 1);
   } else if (player.right) {
-    console.log("right");
     centerX += 5;
     imgObj = ctx.getImageData(centerX, centerY, 1, 1);
   } else if (player.up) {
-    console.log("up");
     centerY -= 30;
     imgObj = ctx.getImageData(centerX, centerY, 1, 1);
   } else if (player.down) {
-    console.log("down");
     centerY += 5;
     imgObj = ctx.getImageData(centerX, centerY, 1, 1);
   }
@@ -44,17 +39,15 @@ export function checkContext(ctx, player) {
 function loopPixelData(obj) {
     for (let i = 0; i < obj.data.length; i += 4) {
         if (obj.data[i] === 136) {
-          console.log("true");
             return true;
         } else if (obj.data[i] === 0) {
-          console.log("false")
           return false;
         }
     }
     return true;
 }
 
-export function compareLocations (player, objects, direction) {
+export function compareLocations (player, objects) {
     // loop over all the objects to see if the playerLoc clashes with any of the objects
 
     // make sure combat does not occur unless moving towards enemy
@@ -63,11 +56,10 @@ export function compareLocations (player, objects, direction) {
     }
     for (let i = 0; i < objects.length; i++) {
       if (detectCollision(player, objects[i])) {
-        console.log("collision detected, false");
+        // console.log("collision detected, false");
         return false;
       }
     }
-    console.log("true")
     return true;
 }
 
@@ -80,7 +72,7 @@ function detectCollision (player, obj) {
       || ((player.x + player.destWidth >= obj.x && player.y + player.destHeight >= obj.y) && (player.x +player.destWdith <= obj.x + obj.destWidth && player.y + player.destHeight <= obj.y + obj.destHeight) )
       )
         {
-          console.log("handling collison", obj);
+  //        console.log("handling collison", obj);
           handleCollision(player, obj);
           return true;
         }
@@ -90,8 +82,9 @@ function detectCollision (player, obj) {
 }
 
 function handleCollision (player, obj) {
-
+      console.log("handling the collision!!!!!");
       if (obj.constructor.name === "Enemy") {
+        console.log("fighting enemy")
         // run combat function
         return player.fightEnemy(obj);
       } else if (obj.constructor.name === "Weapon") {
@@ -99,11 +92,11 @@ function handleCollision (player, obj) {
         // pick up weapon function
         return player.updateWeapon(obj);
       } else if (obj.constructor.name === "Potion") {
-        console.log("Health")
+        console.log("Potion")
         // update health
         return player.updateHealth(obj);
       } else if (obj.constructor.name === "Boss") {
-        console.log("Health")
+        console.log("fightingboss")
         // update health
         return player.fightEnemy(obj);
       }

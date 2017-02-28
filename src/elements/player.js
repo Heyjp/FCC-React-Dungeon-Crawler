@@ -44,12 +44,13 @@ export default class Player  {
 
   }
 
-  update (worldCtx, gameItems) {
+  update (worldCtx, items) {
+
     if (!checkContext(worldCtx, this)) {
       return false
     }
-    console.log(this, "this");
-    if (compareLocations (this, gameItems)) {
+
+    if (compareLocations (this, items)) {
         if (this.left) {
             this.x -= 10;
             this.lastMove = "left";
@@ -66,7 +67,7 @@ export default class Player  {
             this.y += 10;
             this.lastMove = "down";
         }
-      } else if (!compareLocations (this, gameItems)) {
+      } else if (!compareLocations (this, items)) {
           if (this.lastMove === "left" && this.right) {
             this.x += 10;
           } else if (this.lastMove === "right" && this.left) {
@@ -146,6 +147,7 @@ export default class Player  {
       this.weaponDamage = object.damage;
       this.damage = (this.baseDamage * this.level) + this.weaponDamage;
       object.remove = true;
+      console.log(object);
     }
 
     fightEnemy (enemy) {
@@ -159,7 +161,6 @@ export default class Player  {
 
     updateHealth (object) {
       if (this.health + object.health > this.maxHealth) {
-        console.log(this.maxHealth, "maxHelath on pot updateHealth")
         this.health = this.maxHealth;
       } else {
           this.health += object.health;
@@ -176,9 +177,7 @@ export default class Player  {
     }
 
     lose () {
-      clearInterval(gameInt);
       alert("You have died, try again!");
-      startTheGame();
     }
 
 

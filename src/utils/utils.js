@@ -92,10 +92,10 @@ function getRandomLocation(object) {
 }
 
 
-  function clearItems (objArray) {
+export function clearItems (objArray) {
     for (let i = 0; i < objArray.length; i++) {
-
-      if (objArray[i].remove !== undefine) {
+      if (objArray[i].remove !== undefined) {
+        console.log(objArray[i], "removing object!");
         objArray.splice(i, 1);
       }
     }

@@ -153,6 +153,7 @@
 	      var backupCanvas = document.createElement('canvas');
 	      backupCanvas.width = 2000;
 	      backupCanvas.height = 2000;
+
 	      var backupCtx = backupCanvas.getContext('2d');
 	      backupCtx.drawImage(this.state.worldMap.canvas, 0, 0);
 
@@ -179,7 +180,7 @@
 	        var _this2 = this;
 
 	        setInterval(function () {
-	          _this2.updateMap(_this2.state.worldMap.canvas.getContext('2d'), []);
+	          _this2.updateMap(_this2.state.worldMap.canvas.getContext('2d'), _this2.state.worldMap.objects);
 	        }, 200);
 	        return;
 	      });
@@ -188,9 +189,12 @@
 	  }, {
 	    key: 'updateMap',
 	    value: function updateMap(ctx, gameItems) {
+	      (0, _utils.clearItems)(this.state.worldMap.objects);
 	      this.state.player.update(ctx, gameItems);
 	      this.state.camera.update();
 	      this.drawNewMap();
+
+	      console.log(this.state.worldMap.objects.length, "this is object length");
 	    }
 	  }, {
 	    key: 'drawNewMap',
@@ -198,6 +202,11 @@
 	      var drawNewCanvas = this.refs.canvas;
 	      var ctx = drawNewCanvas.getContext('2d');
 	      ctx.clearRect(0, 0, drawNewCanvas.width, drawNewCanvas.height);
+	      this.state.worldMap.ctx.clearRect(0, 0, 2000, 2000);
+	      var backupCanvas = this.state.backupWorldMap;
+	      var backupCtx = backupCanvas.getContext('2d');
+	      this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
+
 	      this.state.worldMap.drawObjects(this.state.worldMap.canvas);
 	      this.state.camera.draw(ctx, this.state.worldMap.canvas);
 	      this.state.player.draw(ctx, this.state.worldMap.canvas);
@@ -24099,12 +24108,13 @@
 /* 278 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.populateRooms = populateRooms;
+	exports.clearItems = clearItems;
 	exports.changeDirection = changeDirection;
 	exports.cancelDirection = cancelDirection;
 	exports.random = random;
@@ -24197,8 +24207,8 @@
 
 	function clearItems(objArray) {
 	    for (var i = 0; i < objArray.length; i++) {
-
-	        if (objArray[i].remove !== undefine) {
+	        if (objArray[i].remove !== undefined) {
+	            console.log(objArray[i], "removing object!");
 	            objArray.splice(i, 1);
 	        }
 	    }
@@ -24256,11 +24266,11 @@
 	}
 
 	function updateUi(player) {
-	    var health = 'Health: ' + player.health;
-	    var damage = 'Damage: ' + player.damage;
-	    var weapon = 'Weapon: ' + player.weapon;
-	    var level = 'Level: ' + player.level;
-	    var experience = 'Experience: ' + player.experience;
+	    var health = "Health: " + player.health;
+	    var damage = "Damage: " + player.damage;
+	    var weapon = "Weapon: " + player.weapon;
+	    var level = "Level: " + player.level;
+	    var experience = "Experience: " + player.experience;
 
 	    var healthBar = document.querySelector('#health');
 	    var levelBar = document.querySelector('#level');
@@ -24277,8 +24287,8 @@
 
 	function updateEnemyUI(enemy) {
 
-	    var health = 'Health: ' + enemy.health;
-	    var damage = 'Damage: ' + enemy.damage;
+	    var health = "Health: " + enemy.health;
+	    var damage = "Damage: " + enemy.damage;
 
 	    var healthBar = document.querySelector('#eHealth');
 	    var damageBar = document.querySelector('#eDamage');
@@ -24298,8 +24308,8 @@
 	    if (enemy.health <= 0) {
 	        enemy.health = 0;
 	    }
-	    var health = 'Health: ' + enemy.health;
-	    var damage = 'Damage: ' + enemy.damage;
+	    var health = "Health: " + enemy.health;
+	    var damage = "Damage: " + enemy.damage;
 
 	    var healthBar = document.querySelector('#eHealth');
 	    var damageBar = document.querySelector('#eDamage');
@@ -24828,12 +24838,13 @@
 
 	    (0, _createClass3.default)(Player, [{
 	        key: 'update',
-	        value: function update(worldCtx, gameItems) {
+	        value: function update(worldCtx, items) {
+
 	            if (!(0, _collision.checkContext)(worldCtx, this)) {
 	                return false;
 	            }
-	            console.log(this, "this");
-	            if ((0, _collision.compareLocations)(this, gameItems)) {
+
+	            if ((0, _collision.compareLocations)(this, items)) {
 	                if (this.left) {
 	                    this.x -= 10;
 	                    this.lastMove = "left";
@@ -24850,7 +24861,7 @@
 	                    this.y += 10;
 	                    this.lastMove = "down";
 	                }
-	            } else if (!(0, _collision.compareLocations)(this, gameItems)) {
+	            } else if (!(0, _collision.compareLocations)(this, items)) {
 	                if (this.lastMove === "left" && this.right) {
 	                    this.x += 10;
 	                } else if (this.lastMove === "right" && this.left) {
@@ -24923,6 +24934,7 @@
 	            this.weaponDamage = object.damage;
 	            this.damage = this.baseDamage * this.level + this.weaponDamage;
 	            object.remove = true;
+	            console.log(object);
 	        }
 	    }, {
 	        key: 'fightEnemy',
@@ -24938,7 +24950,6 @@
 	        key: 'updateHealth',
 	        value: function updateHealth(object) {
 	            if (this.health + object.health > this.maxHealth) {
-	                console.log(this.maxHealth, "maxHelath on pot updateHealth");
 	                this.health = this.maxHealth;
 	            } else {
 	                this.health += object.health;
@@ -24957,9 +24968,7 @@
 	    }, {
 	        key: 'lose',
 	        value: function lose() {
-	            clearInterval(gameInt);
 	            alert("You have died, try again!");
-	            startTheGame();
 	        }
 	    }]);
 	    return Player;
@@ -24990,24 +24999,19 @@
 	  var imgObj = void 0;
 
 	  if (!player.moving) {
-	    console.log("player not moving");
 	    return;
 	  }
 
 	  if (player.left) {
-	    console.log("left");
 	    centerX -= 20;
 	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
 	  } else if (player.right) {
-	    console.log("right");
 	    centerX += 5;
 	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
 	  } else if (player.up) {
-	    console.log("up");
 	    centerY -= 30;
 	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
 	  } else if (player.down) {
-	    console.log("down");
 	    centerY += 5;
 	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
 	  }
@@ -25023,17 +25027,15 @@
 	function loopPixelData(obj) {
 	  for (var i = 0; i < obj.data.length; i += 4) {
 	    if (obj.data[i] === 136) {
-	      console.log("true");
 	      return true;
 	    } else if (obj.data[i] === 0) {
-	      console.log("false");
 	      return false;
 	    }
 	  }
 	  return true;
 	}
 
-	function compareLocations(player, objects, direction) {
+	function compareLocations(player, objects) {
 	  // loop over all the objects to see if the playerLoc clashes with any of the objects
 
 	  // make sure combat does not occur unless moving towards enemy
@@ -25042,11 +25044,10 @@
 	  }
 	  for (var i = 0; i < objects.length; i++) {
 	    if (detectCollision(player, objects[i])) {
-	      console.log("collision detected, false");
+	      // console.log("collision detected, false");
 	      return false;
 	    }
 	  }
-	  console.log("true");
 	  return true;
 	}
 
@@ -25054,7 +25055,7 @@
 	  // Is the object x and y overlapping
 
 	  if (player.x >= obj.x && player.y >= obj.y && player.x <= obj.x + obj.destWidth && player.y <= obj.y + obj.destHeight || player.x + player.destWidth >= obj.x && player.y + player.destHeight >= obj.y && player.x + player.destWdith <= obj.x + obj.destWidth && player.y + player.destHeight <= obj.y + obj.destHeight) {
-	    console.log("handling collison", obj);
+	    //        console.log("handling collison", obj);
 	    handleCollision(player, obj);
 	    return true;
 	  } else {
@@ -25063,8 +25064,9 @@
 	}
 
 	function handleCollision(player, obj) {
-
+	  console.log("handling the collision!!!!!");
 	  if (obj.constructor.name === "Enemy") {
+	    console.log("fighting enemy");
 	    // run combat function
 	    return player.fightEnemy(obj);
 	  } else if (obj.constructor.name === "Weapon") {
@@ -25072,11 +25074,11 @@
 	    // pick up weapon function
 	    return player.updateWeapon(obj);
 	  } else if (obj.constructor.name === "Potion") {
-	    console.log("Health");
+	    console.log("Potion");
 	    // update health
 	    return player.updateHealth(obj);
 	  } else if (obj.constructor.name === "Boss") {
-	    console.log("Health");
+	    console.log("fightingboss");
 	    // update health
 	    return player.fightEnemy(obj);
 	  }
