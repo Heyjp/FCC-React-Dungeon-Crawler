@@ -13,6 +13,8 @@ import ImageList from './elements/images.js';
 
 import {changeDirection, cancelDirection} from './utils/utils.js'
 
+
+
 class Canvas extends React.Component {
 
   constructor (props) {
@@ -20,7 +22,7 @@ class Canvas extends React.Component {
 
     this.state = {
       worldMap: new WorldMap(),
-      player: new Player(),
+      player: new Player()
     }
   }
 

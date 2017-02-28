@@ -39,6 +39,36 @@ export default class WorldMap {
 }
 
 
+/*
+1) import the objects from objects.js
+2) create a function to run once which populates the map with objects
+    2.1) create min and max of enemies / items/ weapons to be in each rooms
+    2.2) cycle through each room - create the alotted objects and get a random location
+    2.3) when a location is added check to see if it overlaps with the previous objects, if so rerandom the location
+    2.4) when the list of objects is finalized for that room, concat with larger array of all the objects on map
+    2.5) exit once all the rooms are completed 
+
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 
