@@ -20,18 +20,34 @@ class Map extends React.Component {
   constructor (props) {
     super(props);
 
-    this.state = {
+    this.initialState =  {
       worldMap: new WorldMap(),
       player: new Player(),
-      Images: new ImageList()
-    }
+      Images: new ImageList(),
+      key: 0
+    };
+
+    this.state = this.initialState;
+
   }
 
-  componentDidMount() {
+  reset () {
+    console.log("game resetting");
+    location.reload();
+  }
+
+  startGame() {
+    console.log("starting the game");
     this.state.Images.loadImages();
+    this.state.player.getLocation(this.state.worldMap.rooms)
     this.drawCanvas();
     this.setBackupCanvas();
     this.startGameLoop()
+  }
+
+
+  componentDidMount() {
+    this.startGame();
   }
 
   drawCanvas () {
@@ -66,8 +82,6 @@ class Map extends React.Component {
     })
   }
 
-
-
   startGameLoop () {
     var interval = setInterval(() => {
       this.updateMap(this.state.worldMap.canvas.getContext('2d'), this.state.worldMap.objects);
@@ -79,11 +93,16 @@ class Map extends React.Component {
   }
 
   stopGameLoop () {
-    this.state.interval = clearInterval(interval);
-    this.setState({
-      interval: clearInterval(interval)
-    })
+    console.log("stopping game loop")
+    clearInterval(this.state.interval);
 
+    if (this.state.player.win) {
+      alert("Congratulations you have defeated the dragon");
+      this.reset();
+    } else if (this.state.player.dead){
+      alert("You have died so sorry, try again!");
+      this.reset();
+    }
   }
 
   updateMap (ctx, gameItems) {
@@ -96,14 +115,23 @@ class Map extends React.Component {
     this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
     this.state.worldMap.drawObjects(this.state.worldMap.canvas);
 
-    console.log(this.state.worldMap, "this is worldMap");
+    this.setState({...this.state});
 
+    if (this.state.player.win) {
+      console.log("player won")
+      this.stopGameLoop();
+    } else if (this.state.player.dead) {
+      console.log("player lose");
+      this.stopGameLoop();
+    } else {
+      console.log("Everythings fine");
+    }
   }
 
   render () {
     return (
-      <div  tabIndex="0" className="game-container" onKeyUp={this.handleKeyUp.bind(this)} onKeyDown={this.handleKeyDown.bind(this)}>
-        <Legend player={this.state.player} />
+      <div key={this.state.key} tabIndex="0" className="game-container" onKeyUp={this.handleKeyUp.bind(this)} onKeyDown={this.handleKeyDown.bind(this)}>
+        <Legend player={this.state.player} enemies={this.state.worldMap.objects}/>
         <Canvas worldMap={this.state.worldMap.canvas} player={this.state.player}  width="750" height="750"  />
       </div>
     );
@@ -113,22 +141,37 @@ class Map extends React.Component {
 class Legend extends React.Component {
   constructor (props) {
     super(props);
+
   }
+
   render () {
+
+        const enemy = this.props.enemies.filter(function (e) {
+          return e.lastEnemy;
+        });
+
       return (
         <div className="stat-block">
           <ul>
             <li>Player</li>
-            <li>Level: 0</li>
-            <li>Weapon: Nunchucks</li>
-            <li>Health</li>
+            <li>Level: {this.props.player.level}</li>
+            <li>Weapon: {this.props.player.weapon}</li>
+            <li>Health: {this.props.player.health}</li>
+            <li>Experience: {this.props.player.experience}</li>
           </ul>
           <hr />
-          <ul>
-            <li>Enemy</li>
-            <li>Level: 0</li>
-            <li>Health: 100</li>
-          </ul>
+            {enemy.length > 0 ? (
+                <ul>
+                  <li>Enemy</li>
+                  <li>Health {enemy[0].health}</li>
+                  <li>Damage {enemy[0].damage}</li>
+                </ul>
+                ) : (
+                <ul>
+                  <li>No Enemy</li>
+                </ul>
+                )
+            }
           <hr />
           <h4>Legend</h4>
           <ul>
@@ -160,7 +203,6 @@ class Canvas extends React.Component {
   }
 
   setCamera () {
-      console.log("setting camera");
       const canvas = this.refs.canvas;
       const ctx = this.refs.canvas.getContext('2d');
 
@@ -172,11 +214,6 @@ class Canvas extends React.Component {
 
   componentWillReceiveProps() {
     this.drawNewMap();
-    console.log("received props");
-
-    setInterval(function() {
-      this.drawNewMap();
-    }.bind(this), 100);
   }
 
   drawNewMap () {
@@ -190,7 +227,9 @@ class Canvas extends React.Component {
     this.state.camera.draw(ctx, this.props.worldMap);
     this.props.player.draw(ctx, this.props.worldMap);
 
+
   }
+
 
   render() {
       return (
@@ -202,6 +241,6 @@ class Canvas extends React.Component {
 
 
 ReactDOM.render(
-  <Map />,
+  <Map key={0}/>,
   document.getElementById('root')
 );

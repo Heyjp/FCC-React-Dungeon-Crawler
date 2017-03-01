@@ -83,7 +83,7 @@ function getItemLocations (objects) {
 }
 
 
-function getRandomLocation(object) {
+export function getRandomLocation(object) {
 
     // takes a random location in the room minus 40px for sprite width & height
     object.x = random(object.room.x +20, (object.room.x + object.room.w) - 40);
@@ -120,18 +120,6 @@ export function clearItems (objArray) {
       player.draw();
   }
 
-  // handle sprite and player movement
-  function handleUpdate(e) {
-      player.update();
-      updateLocs();
-      populateMap(enemiesArray);
-      gameItems = clearItems(gameItems);
-      paintWorld(rooms);
-      updateUi(player);
-      popItems(gameItems);
-      drawCanvas();
-  }
-
   function handleItems(weapons, potions, enemies) {
       let newArray = [];
       newArray = newArray.concat(potions).concat(weapons).concat(enemies);
@@ -140,81 +128,6 @@ export function clearItems (objArray) {
           return randomSpot(rooms, e);
       });
       return newArray;
-  }
-
-  function popItems(items) {
-
-      function draw(obj) {
-          c_context.drawImage(obj.img,
-              obj.sourceX,
-              obj.sourceY,
-              obj.width,
-              obj.height,
-              obj.x,
-              obj.y,
-              obj.destWidth,
-              obj.destHeight
-          );
-      }
-
-      items.forEach(function(e) {
-          return draw(e);
-      })
-  }
-
-  function updateUi (player) {
-    var health = `Health: ${player.health}`;
-    var damage = `Damage: ${player.damage}`;
-    var weapon = `Weapon: ${player.weapon}`;
-    var level = `Level: ${player.level}`;
-    var experience = `Experience: ${player.experience}`;
-
-    var healthBar = document.querySelector('#health');
-    var levelBar = document.querySelector('#level')
-    var weaponBar = document.querySelector('#weapon');
-    var damageBar = document.querySelector('#damage');
-    var experienceBar = document.querySelector('#experience');
-
-    healthBar.textContent = health;
-    weaponBar.textContent = weapon;
-    damageBar.textContent = damage;
-    levelBar.textContent = level;
-    experienceBar.textContent = experience;
-  }
-
-  function updateEnemyUI (enemy) {
-
-    var health = `Health: ${enemy.health}`;
-    var damage = `Damage: ${enemy.damage}`;
-
-    var healthBar = document.querySelector('#eHealth');
-    var damageBar = document.querySelector('#eDamage');
-
-
-
-    if (enemy.health <= 0) {
-      setTimeout(function () {
-        clearEnemyUI(enemy);
-      }, 1000)
-    }
-
-    healthBar.textContent = health;
-    damageBar.textContent = damage;
-  }
-
-  function clearEnemyUI (enemy) {
-
-    if (enemy.health <= 0) {
-      enemy.health = 0;
-    }
-    var health = `Health: ${enemy.health}`;
-    var damage = `Damage: ${enemy.damage}`;
-
-    var healthBar = document.querySelector('#eHealth');
-    var damageBar = document.querySelector('#eDamage');
-
-    healthBar.textContent = health;
-    damageBar.textContent = "Defeated!";
   }
 
 

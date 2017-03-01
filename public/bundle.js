@@ -46,6 +46,10 @@
 
 	'use strict';
 
+	var _extends2 = __webpack_require__(1);
+
+	var _extends3 = _interopRequireDefault(_extends2);
+
 	var _getPrototypeOf = __webpack_require__(39);
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -108,21 +112,38 @@
 
 	    var _this = (0, _possibleConstructorReturn3.default)(this, (Map.__proto__ || (0, _getPrototypeOf2.default)(Map)).call(this, props));
 
-	    _this.state = {
+	    _this.initialState = {
 	      worldMap: new _canvas2.default(),
 	      player: new _player2.default(),
-	      Images: new _images2.default()
+	      Images: new _images2.default(),
+	      key: 0
 	    };
+
+	    _this.state = _this.initialState;
+
 	    return _this;
 	  }
 
 	  (0, _createClass3.default)(Map, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
+	    key: 'reset',
+	    value: function reset() {
+	      console.log("game resetting");
+	      location.reload();
+	    }
+	  }, {
+	    key: 'startGame',
+	    value: function startGame() {
+	      console.log("starting the game");
 	      this.state.Images.loadImages();
+	      this.state.player.getLocation(this.state.worldMap.rooms);
 	      this.drawCanvas();
 	      this.setBackupCanvas();
 	      this.startGameLoop();
+	    }
+	  }, {
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this.startGame();
 	    }
 	  }, {
 	    key: 'drawCanvas',
@@ -175,10 +196,16 @@
 	  }, {
 	    key: 'stopGameLoop',
 	    value: function stopGameLoop() {
-	      this.state.interval = clearInterval(interval);
-	      this.setState({
-	        interval: clearInterval(interval)
-	      });
+	      console.log("stopping game loop");
+	      clearInterval(this.state.interval);
+
+	      if (this.state.player.win) {
+	        alert("Congratulations you have defeated the dragon");
+	        this.reset();
+	      } else if (this.state.player.dead) {
+	        alert("You have died so sorry, try again!");
+	        this.reset();
+	      }
 	    }
 	  }, {
 	    key: 'updateMap',
@@ -192,15 +219,25 @@
 	      this.state.worldMap.ctx.drawImage(backupCanvas, 0, 0);
 	      this.state.worldMap.drawObjects(this.state.worldMap.canvas);
 
-	      console.log(this.state.worldMap, "this is worldMap");
+	      this.setState((0, _extends3.default)({}, this.state));
+
+	      if (this.state.player.win) {
+	        console.log("player won");
+	        this.stopGameLoop();
+	      } else if (this.state.player.dead) {
+	        console.log("player lose");
+	        this.stopGameLoop();
+	      } else {
+	        console.log("Everythings fine");
+	      }
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
 	        'div',
-	        { tabIndex: '0', className: 'game-container', onKeyUp: this.handleKeyUp.bind(this), onKeyDown: this.handleKeyDown.bind(this) },
-	        _react2.default.createElement(Legend, { player: this.state.player }),
+	        { key: this.state.key, tabIndex: '0', className: 'game-container', onKeyUp: this.handleKeyUp.bind(this), onKeyDown: this.handleKeyDown.bind(this) },
+	        _react2.default.createElement(Legend, { player: this.state.player, enemies: this.state.worldMap.objects }),
 	        _react2.default.createElement(Canvas, { worldMap: this.state.worldMap.canvas, player: this.state.player, width: '750', height: '750' })
 	      );
 	    }
@@ -219,6 +256,11 @@
 	  (0, _createClass3.default)(Legend, [{
 	    key: 'render',
 	    value: function render() {
+
+	      var enemy = this.props.enemies.filter(function (e) {
+	        return e.lastEnemy;
+	      });
+
 	      return _react2.default.createElement(
 	        'div',
 	        { className: 'stat-block' },
@@ -233,21 +275,30 @@
 	          _react2.default.createElement(
 	            'li',
 	            null,
-	            'Level: 0'
+	            'Level: ',
+	            this.props.player.level
 	          ),
 	          _react2.default.createElement(
 	            'li',
 	            null,
-	            'Weapon: Nunchucks'
+	            'Weapon: ',
+	            this.props.player.weapon
 	          ),
 	          _react2.default.createElement(
 	            'li',
 	            null,
-	            'Health'
+	            'Health: ',
+	            this.props.player.health
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Experience: ',
+	            this.props.player.experience
 	          )
 	        ),
 	        _react2.default.createElement('hr', null),
-	        _react2.default.createElement(
+	        enemy.length > 0 ? _react2.default.createElement(
 	          'ul',
 	          null,
 	          _react2.default.createElement(
@@ -258,12 +309,22 @@
 	          _react2.default.createElement(
 	            'li',
 	            null,
-	            'Level: 0'
+	            'Health ',
+	            enemy[0].health
 	          ),
 	          _react2.default.createElement(
 	            'li',
 	            null,
-	            'Health: 100'
+	            'Damage ',
+	            enemy[0].damage
+	          )
+	        ) : _react2.default.createElement(
+	          'ul',
+	          null,
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'No Enemy'
 	          )
 	        ),
 	        _react2.default.createElement('hr', null),
@@ -352,7 +413,6 @@
 	  }, {
 	    key: 'setCamera',
 	    value: function setCamera() {
-	      console.log("setting camera");
 	      var canvas = this.refs.canvas;
 	      var ctx = this.refs.canvas.getContext('2d');
 
@@ -364,11 +424,6 @@
 	    key: 'componentWillReceiveProps',
 	    value: function componentWillReceiveProps() {
 	      this.drawNewMap();
-	      console.log("received props");
-
-	      setInterval(function () {
-	        this.drawNewMap();
-	      }.bind(this), 100);
 	    }
 	  }, {
 	    key: 'drawNewMap',
@@ -392,13 +447,59 @@
 	  return Canvas;
 	}(_react2.default.Component);
 
-	_reactDom2.default.render(_react2.default.createElement(Map, null), document.getElementById('root'));
+	_reactDom2.default.render(_react2.default.createElement(Map, { key: 0 }), document.getElementById('root'));
 
 /***/ },
-/* 1 */,
-/* 2 */,
-/* 3 */,
-/* 4 */,
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	exports.__esModule = true;
+
+	var _assign = __webpack_require__(2);
+
+	var _assign2 = _interopRequireDefault(_assign);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = _assign2.default || function (target) {
+	  for (var i = 1; i < arguments.length; i++) {
+	    var source = arguments[i];
+
+	    for (var key in source) {
+	      if (Object.prototype.hasOwnProperty.call(source, key)) {
+	        target[key] = source[key];
+	      }
+	    }
+	  }
+
+	  return target;
+	};
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = { "default": __webpack_require__(3), __esModule: true };
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(4);
+	module.exports = __webpack_require__(7).Object.assign;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.3.1 Object.assign(target, source)
+	var $export = __webpack_require__(5);
+
+	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(20)});
+
+/***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -638,7 +739,44 @@
 	};
 
 /***/ },
-/* 20 */,
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	// 19.1.2.1 Object.assign(target, source, ...)
+	var getKeys  = __webpack_require__(21)
+	  , gOPS     = __webpack_require__(36)
+	  , pIE      = __webpack_require__(37)
+	  , toObject = __webpack_require__(38)
+	  , IObject  = __webpack_require__(25)
+	  , $assign  = Object.assign;
+
+	// should work with symbols and should have deterministic property order (V8 bug)
+	module.exports = !$assign || __webpack_require__(16)(function(){
+	  var A = {}
+	    , B = {}
+	    , S = Symbol()
+	    , K = 'abcdefghijklmnopqrst';
+	  A[S] = 7;
+	  K.split('').forEach(function(k){ B[k] = k; });
+	  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
+	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
+	  var T     = toObject(target)
+	    , aLen  = arguments.length
+	    , index = 1
+	    , getSymbols = gOPS.f
+	    , isEnum     = pIE.f;
+	  while(aLen > index){
+	    var S      = IObject(arguments[index++])
+	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
+	      , length = keys.length
+	      , j      = 0
+	      , key;
+	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
+	  } return T;
+	} : $assign;
+
+/***/ },
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -23667,7 +23805,7 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	    value: true
+	  value: true
 	});
 
 	var _classCallCheck2 = __webpack_require__(44);
@@ -23713,77 +23851,36 @@
 
 	var roomArray = [];
 	world.forEach(function (e) {
-	    var room = new _room2.default(e);
-	    roomArray.push(room);
+	  var room = new _room2.default(e);
+	  roomArray.push(room);
 	});
 
 	var WorldMap = function () {
-	    function WorldMap() {
-	        (0, _classCallCheck3.default)(this, WorldMap);
+	  function WorldMap() {
+	    (0, _classCallCheck3.default)(this, WorldMap);
 
-	        this.map = container_tree;
-	        this.rooms = roomArray;
+	    this.map = container_tree;
+	    this.rooms = roomArray;
 
-	        this.canvas = document.createElement('canvas');
-	        this.canvas.width = MAP_SIZE;
-	        this.canvas.height = MAP_SIZE;
-	        this.ctx = this.canvas.getContext('2d');
+	    this.canvas = document.createElement('canvas');
+	    this.canvas.width = MAP_SIZE;
+	    this.canvas.height = MAP_SIZE;
+	    this.ctx = this.canvas.getContext('2d');
 
-	        this.objects = (0, _utils.populateRooms)(this.rooms, _objects.Enemy, _objects.Potion, _objects.Weapon, _objects.Boss);
+	    this.objects = (0, _utils.populateRooms)(this.rooms, _objects.Enemy, _objects.Potion, _objects.Weapon, _objects.Boss);
+	  }
+
+	  (0, _createClass3.default)(WorldMap, [{
+	    key: 'drawObjects',
+	    value: function drawObjects() {
+	      var ctx = this.ctx;
+	      this.objects.forEach(function (e) {
+	        e.draw(ctx);
+	      });
 	    }
-
-	    (0, _createClass3.default)(WorldMap, [{
-	        key: 'drawObjects',
-	        value: function drawObjects() {
-	            var ctx = this.ctx;
-	            this.objects.forEach(function (e) {
-	                e.draw(ctx);
-	            });
-	        }
-	    }]);
-	    return WorldMap;
+	  }]);
+	  return WorldMap;
 	}();
-
-	/*
-	1) import the objects from objects.js
-	2) create a function to run once which populates the map with objects
-	    2.1) create min and max of enemies / items/ weapons to be in each rooms
-	    2.2) cycle through each room - create the alotted objects and get a random location
-	    2.3) when a location is added check to see if it overlaps with the previous objects, if so rerandom the location
-	    2.4) when the list of objects is finalized for that room, concat with larger array of all the objects on map
-	    2.5) exit once all the rooms are completed
-
-	*/
-
-	/*
-
-	Private and public functions...
-
-	public functions have access to private values
-
-
-	function Person(name, secret) {
-	    // public
-	    this.name = name;
-
-	    // private
-	    var secret = secret;
-
-	    // public methods have access to private members
-	    this.setSecret = function(s) {
-	        secret = s;
-	    }
-
-	    this.getSecret = function() {
-	        return secret;
-	    }
-	}
-
-	// Must use getters/setters
-	Person.prototype.spillSecret = function() { alert(this.getSecret()); };
-
-	*/
-
 
 	exports.default = WorldMap;
 
@@ -24034,6 +24131,7 @@
 	    value: true
 	});
 	exports.populateRooms = populateRooms;
+	exports.getRandomLocation = getRandomLocation;
 	exports.clearItems = clearItems;
 	exports.changeDirection = changeDirection;
 	exports.cancelDirection = cancelDirection;
@@ -24152,18 +24250,6 @@
 	    player.draw();
 	}
 
-	// handle sprite and player movement
-	function handleUpdate(e) {
-	    player.update();
-	    updateLocs();
-	    populateMap(enemiesArray);
-	    gameItems = clearItems(gameItems);
-	    paintWorld(rooms);
-	    updateUi(player);
-	    popItems(gameItems);
-	    drawCanvas();
-	}
-
 	function handleItems(weapons, potions, enemies) {
 	    var newArray = [];
 	    newArray = newArray.concat(potions).concat(weapons).concat(enemies);
@@ -24172,70 +24258,6 @@
 	        return randomSpot(rooms, e);
 	    });
 	    return newArray;
-	}
-
-	function popItems(items) {
-
-	    function draw(obj) {
-	        c_context.drawImage(obj.img, obj.sourceX, obj.sourceY, obj.width, obj.height, obj.x, obj.y, obj.destWidth, obj.destHeight);
-	    }
-
-	    items.forEach(function (e) {
-	        return draw(e);
-	    });
-	}
-
-	function updateUi(player) {
-	    var health = "Health: " + player.health;
-	    var damage = "Damage: " + player.damage;
-	    var weapon = "Weapon: " + player.weapon;
-	    var level = "Level: " + player.level;
-	    var experience = "Experience: " + player.experience;
-
-	    var healthBar = document.querySelector('#health');
-	    var levelBar = document.querySelector('#level');
-	    var weaponBar = document.querySelector('#weapon');
-	    var damageBar = document.querySelector('#damage');
-	    var experienceBar = document.querySelector('#experience');
-
-	    healthBar.textContent = health;
-	    weaponBar.textContent = weapon;
-	    damageBar.textContent = damage;
-	    levelBar.textContent = level;
-	    experienceBar.textContent = experience;
-	}
-
-	function updateEnemyUI(enemy) {
-
-	    var health = "Health: " + enemy.health;
-	    var damage = "Damage: " + enemy.damage;
-
-	    var healthBar = document.querySelector('#eHealth');
-	    var damageBar = document.querySelector('#eDamage');
-
-	    if (enemy.health <= 0) {
-	        setTimeout(function () {
-	            clearEnemyUI(enemy);
-	        }, 1000);
-	    }
-
-	    healthBar.textContent = health;
-	    damageBar.textContent = damage;
-	}
-
-	function clearEnemyUI(enemy) {
-
-	    if (enemy.health <= 0) {
-	        enemy.health = 0;
-	    }
-	    var health = "Health: " + enemy.health;
-	    var damage = "Damage: " + enemy.damage;
-
-	    var healthBar = document.querySelector('#eHealth');
-	    var damageBar = document.querySelector('#eDamage');
-
-	    healthBar.textContent = health;
-	    damageBar.textContent = "Defeated!";
 	}
 
 	function changeDirection(e, player) {
@@ -24449,6 +24471,7 @@
 	    (0, _createClass3.default)(Enemy, [{
 	        key: "combat",
 	        value: function combat(player) {
+	            this.lastEnemy = true;
 	            this.health -= player.damage;
 
 	            if (this.health <= 0) {
@@ -24586,6 +24609,7 @@
 	    (0, _createClass3.default)(Boss, [{
 	        key: "combat",
 	        value: function combat(player) {
+	            this.lastEnemy = true;
 	            this.health -= player.damage;
 
 	            if (this.health <= 0) {
@@ -24595,8 +24619,13 @@
 	                if (player.experience > 100 * player.level) {
 	                    player.levelUp();
 	                }
-	                endGame();
+	                this.endGame(player);
 	            }
+	        }
+	    }, {
+	        key: "endGame",
+	        value: function endGame(player) {
+	            player.win = true;
 	        }
 	    }]);
 	    return Boss;
@@ -24606,7 +24635,7 @@
 /* 281 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -24630,7 +24659,6 @@
 	    function Camera(canvas, theMap) {
 	        (0, _classCallCheck3.default)(this, Camera);
 
-	        console.log(canvas, theMap, "canvas and theMap");
 	        this.x = 0;
 	        this.y = 0;
 
@@ -24649,14 +24677,13 @@
 	    }
 
 	    (0, _createClass3.default)(Camera, [{
-	        key: "follow",
+	        key: 'follow',
 	        value: function follow(followObj) {
 	            this.follow = followObj;
 	        }
 	    }, {
-	        key: "update",
+	        key: 'update',
 	        value: function update() {
-	            console.log("updating");
 	            // Camera within the boundaries of the world map
 	            if (this.follow.x - this.centerX < 0) {
 	                this.x = 0;
@@ -24675,7 +24702,7 @@
 	            }
 	        }
 	    }, {
-	        key: "draw",
+	        key: 'draw',
 	        value: function draw(ctx, theMap) {
 	            // ctx.clearRect(0, 0, this.xView, this.yView);
 	            ctx.drawImage(theMap, this.x, this.y, this.xView, this.yView, 0, 0, this.xView, this.yView);
@@ -24710,6 +24737,8 @@
 
 	var _collision = __webpack_require__(283);
 
+	var _utils = __webpack_require__(278);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Player = function () {
@@ -24726,9 +24755,6 @@
 	        this.sourceWidth = 15;
 	        this.sourceHeight = 15;
 	        // location to place on canvas
-
-	        this.x = 200;
-	        this.y = 200;
 
 	        this.destWidth = 20;
 	        this.destHeight = 20;
@@ -24822,29 +24848,9 @@
 	        }
 	    }, {
 	        key: 'getLocation',
-	        value: function getLocation() {
-	            // list of all the rooms on the map
-	            var rooms = leafs;
-	            // picks a random room
-	            var randomLeaf = rooms[Math.floor(Math.random() * (leafs.length - 0) + 0)];
-
-	            // Check if room is full or not.
-	            //  if (checkRoomPop(randomLeaf)) {
-	            //    this.getLocation(rooms);
-	            //  }
-
-	            // take random location and assign it to local vars x and y;
-	            var newObj = findRandomSpot(randomLeaf);
-	            var x = newObj.x;
-	            var y = newObj.y;
-
-	            // check if either overlap and if not assign x and y to this or rerun function for new coords
-	            // if (this.checkOverlap(enemiesObj, x, y)) {
-	            this.x = x;
-	            this.y = y;
-	            //} else {
-	            //  this.getLocation();
-	            //}
+	        value: function getLocation(rooms) {
+	            this.room = rooms[(0, _utils.random)(0, 10)];
+	            (0, _utils.getRandomLocation)(this);
 	        }
 	    }, {
 	        key: 'updateWeapon',
@@ -24853,15 +24859,16 @@
 	            this.weaponDamage = object.damage;
 	            this.damage = this.baseDamage * this.level + this.weaponDamage;
 	            object.remove = true;
-	            console.log(object);
 	        }
 	    }, {
 	        key: 'fightEnemy',
 	        value: function fightEnemy(enemy) {
+
 	            this.health -= enemy.damage;
 	            enemy.combat(this);
 
 	            if (this.health <= 0) {
+	                console.log("player losing from health");
 	                this.lose();
 	            }
 	        }
@@ -24887,7 +24894,9 @@
 	    }, {
 	        key: 'lose',
 	        value: function lose() {
+	            console.log("you lose right away dont do this");
 	            alert("You have died, try again!");
+	            this.dead = true;
 	        }
 	    }]);
 	    return Player;
@@ -24928,7 +24937,7 @@
 	    centerX += 5;
 	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
 	  } else if (player.up) {
-	    centerY -= 30;
+	    centerY -= 20;
 	    imgObj = ctx.getImageData(centerX, centerY, 1, 1);
 	  } else if (player.down) {
 	    centerY += 5;

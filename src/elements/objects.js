@@ -58,6 +58,7 @@ export class Enemy extends Item {
   }
 
   combat (player) {
+    this.lastEnemy = true;
     this.health -= player.damage;
 
     if (this.health <= 0) {
@@ -175,6 +176,7 @@ export class Boss extends Item {
   }
 
   combat (player) {
+    this.lastEnemy = true;
     this.health -= player.damage;
 
     if (this.health <= 0) {
@@ -184,8 +186,12 @@ export class Boss extends Item {
         if (player.experience > (100 * player.level)) {
           player.levelUp();
         }
-      endGame();
+    this.endGame(player);
     }
+  }
+
+  endGame (player) {
+    player.win = true;
   }
 
 }

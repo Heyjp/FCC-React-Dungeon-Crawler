@@ -10,7 +10,6 @@ import React from 'react';
 export default class Camera  {
 
   constructor (canvas, theMap) {
-    console.log(canvas, theMap, "canvas and theMap");
     this.x = 0;
     this.y = 0
 
@@ -33,7 +32,6 @@ export default class Camera  {
   }
 
   update () {
-    console.log("updating");
     // Camera within the boundaries of the world map
     if (this.follow.x - this.centerX < 0) {
         this.x = 0;

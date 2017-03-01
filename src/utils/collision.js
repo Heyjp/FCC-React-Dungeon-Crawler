@@ -20,7 +20,7 @@ export function checkContext(ctx, player) {
     centerX += 5;
     imgObj = ctx.getImageData(centerX, centerY, 1, 1);
   } else if (player.up) {
-    centerY -= 30;
+    centerY -= 20;
     imgObj = ctx.getImageData(centerX, centerY, 1, 1);
   } else if (player.down) {
     centerY += 5;

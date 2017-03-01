@@ -1,4 +1,5 @@
 import {checkContext, compareLocations} from '../utils/collision.js';
+import {random, getRandomLocation} from '../utils/utils.js';
 
 
 export default class Player  {
@@ -14,9 +15,6 @@ export default class Player  {
     this.sourceWidth = 15;
     this.sourceHeight = 15;
     // location to place on canvas
-
-    this.x = 200;
-    this.y = 200;
 
     this.destWidth = 20;
     this.destHeight = 20;
@@ -117,29 +115,10 @@ export default class Player  {
       );
     }
 
-    getLocation () {
-      // list of all the rooms on the map
-      let rooms = leafs;
-      // picks a random room
-      let randomLeaf = rooms[Math.floor(Math.random() * (leafs.length - 0) + 0)]
+    getLocation (rooms) {
+      this.room = rooms[random(0, 10)]
+      getRandomLocation(this)
 
-      // Check if room is full or not.
-      //  if (checkRoomPop(randomLeaf)) {
-      //    this.getLocation(rooms);
-      //  }
-
-      // take random location and assign it to local vars x and y;
-      let newObj = findRandomSpot(randomLeaf);
-      let x = newObj.x;
-      let y = newObj.y;
-
-      // check if either overlap and if not assign x and y to this or rerun function for new coords
-      // if (this.checkOverlap(enemiesObj, x, y)) {
-      this.x = x;
-      this.y = y;
-      //} else {
-      //  this.getLocation();
-      //}
     }
 
     updateWeapon ( object) {
@@ -147,14 +126,15 @@ export default class Player  {
       this.weaponDamage = object.damage;
       this.damage = (this.baseDamage * this.level) + this.weaponDamage;
       object.remove = true;
-      console.log(object);
     }
 
     fightEnemy (enemy) {
+
       this.health -= enemy.damage;
       enemy.combat(this);
 
       if (this.health <= 0) {
+        console.log("player losing from health");
         this.lose()
       }
     }
@@ -177,7 +157,9 @@ export default class Player  {
     }
 
     lose () {
+      console.log("you lose right away dont do this")
       alert("You have died, try again!");
+      this.dead = true;
     }
 
 
