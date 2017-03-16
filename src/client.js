@@ -24,7 +24,6 @@ class Map extends React.Component {
       worldMap: new WorldMap(),
       player: new Player(),
       Images: new ImageList(),
-      key: 0
     };
 
     this.state = this.initialState;
@@ -52,7 +51,7 @@ class Map extends React.Component {
 
   drawCanvas () {
     const ctx = this.state.worldMap.canvas.getContext('2d');
-    this.state.worldMap.map.paint(ctx);
+  //  this.state.worldMap.map.paint(ctx);
     this.state.worldMap.rooms.forEach(function (e) {
       e.paint(ctx);
     });
@@ -151,15 +150,20 @@ class Legend extends React.Component {
         });
 
       return (
+      <div>
+        <div>
+          <h1 className="title">
+            RogueLike React<br/> Dungeon Crawler
+          </h1>
+        </div>
         <div className="stat-block">
           <ul>
-            <li>Player</li>
+            <h4>Player</h4>
             <li>Level: {this.props.player.level}</li>
             <li>Weapon: {this.props.player.weapon}</li>
             <li>Health: {this.props.player.health}</li>
             <li>Experience: {this.props.player.experience}</li>
           </ul>
-          <hr />
             {enemy.length > 0 ? (
                 <ul>
                   <li>Enemy</li>
@@ -172,9 +176,9 @@ class Legend extends React.Component {
                 </ul>
                 )
             }
-          <hr />
-          <h4>Legend</h4>
+
           <ul>
+            <h4>Legend</h4>
             <li>Player  <img src="img/tuxedo.png" alt="" /></li>
             <li>Enemy <img src="img/earth019.png" alt="" /></li>
             <li>Dragon <img src="img/dragon.png" alt="" /></li>
@@ -185,6 +189,7 @@ class Legend extends React.Component {
             <li>25% potion <img src="img/pt4.png" alt="" /></li>
           </ul>
         </div>
+      </div>
     )
   }
 }
@@ -226,8 +231,6 @@ class Canvas extends React.Component {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.state.camera.draw(ctx, this.props.worldMap);
     this.props.player.draw(ctx, this.props.worldMap);
-
-
   }
 
 

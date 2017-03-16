@@ -115,8 +115,7 @@
 	    _this.initialState = {
 	      worldMap: new _canvas2.default(),
 	      player: new _player2.default(),
-	      Images: new _images2.default(),
-	      key: 0
+	      Images: new _images2.default()
 	    };
 
 	    _this.state = _this.initialState;
@@ -149,7 +148,7 @@
 	    key: 'drawCanvas',
 	    value: function drawCanvas() {
 	      var ctx = this.state.worldMap.canvas.getContext('2d');
-	      this.state.worldMap.map.paint(ctx);
+	      //  this.state.worldMap.map.paint(ctx);
 	      this.state.worldMap.rooms.forEach(function (e) {
 	        e.paint(ctx);
 	      });
@@ -263,126 +262,139 @@
 
 	      return _react2.default.createElement(
 	        'div',
-	        { className: 'stat-block' },
+	        null,
 	        _react2.default.createElement(
-	          'ul',
+	          'div',
 	          null,
 	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Player'
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Level: ',
-	            this.props.player.level
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Weapon: ',
-	            this.props.player.weapon
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Health: ',
-	            this.props.player.health
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Experience: ',
-	            this.props.player.experience
+	            'h1',
+	            { className: 'title' },
+	            'RogueLike React',
+	            _react2.default.createElement('br', null),
+	            ' Dungeon Crawler'
 	          )
 	        ),
-	        _react2.default.createElement('hr', null),
-	        enemy.length > 0 ? _react2.default.createElement(
-	          'ul',
-	          null,
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Enemy'
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Health ',
-	            enemy[0].health
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Damage ',
-	            enemy[0].damage
-	          )
-	        ) : _react2.default.createElement(
-	          'ul',
-	          null,
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'No Enemy'
-	          )
-	        ),
-	        _react2.default.createElement('hr', null),
 	        _react2.default.createElement(
-	          'h4',
-	          null,
-	          'Legend'
-	        ),
-	        _react2.default.createElement(
-	          'ul',
-	          null,
+	          'div',
+	          { className: 'stat-block' },
 	          _react2.default.createElement(
-	            'li',
+	            'ul',
 	            null,
-	            'Player  ',
-	            _react2.default.createElement('img', { src: 'img/tuxedo.png', alt: '' })
+	            _react2.default.createElement(
+	              'h4',
+	              null,
+	              'Player'
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Level: ',
+	              this.props.player.level
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Weapon: ',
+	              this.props.player.weapon
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Health: ',
+	              this.props.player.health
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Experience: ',
+	              this.props.player.experience
+	            )
+	          ),
+	          enemy.length > 0 ? _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Enemy'
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Health ',
+	              enemy[0].health
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Damage ',
+	              enemy[0].damage
+	            )
+	          ) : _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'No Enemy'
+	            )
 	          ),
 	          _react2.default.createElement(
-	            'li',
+	            'ul',
 	            null,
-	            'Enemy ',
-	            _react2.default.createElement('img', { src: 'img/earth019.png', alt: '' })
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Dragon ',
-	            _react2.default.createElement('img', { src: 'img/dragon.png', alt: '' })
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Weapons Chest ',
-	            _react2.default.createElement('img', { src: 'img/chestRed.png', alt: '' })
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            'Full Health Potion ',
-	            _react2.default.createElement('img', { src: 'img/pt1.png', alt: '' })
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            '75% Potion ',
-	            _react2.default.createElement('img', { src: 'img/pt2.png', alt: '' })
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            '50% Potion ',
-	            _react2.default.createElement('img', { src: 'img/pt3.png', alt: '' })
-	          ),
-	          _react2.default.createElement(
-	            'li',
-	            null,
-	            '25% potion ',
-	            _react2.default.createElement('img', { src: 'img/pt4.png', alt: '' })
+	            _react2.default.createElement(
+	              'h4',
+	              null,
+	              'Legend'
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Player  ',
+	              _react2.default.createElement('img', { src: 'img/tuxedo.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Enemy ',
+	              _react2.default.createElement('img', { src: 'img/earth019.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Dragon ',
+	              _react2.default.createElement('img', { src: 'img/dragon.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Weapons Chest ',
+	              _react2.default.createElement('img', { src: 'img/chestRed.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              'Full Health Potion ',
+	              _react2.default.createElement('img', { src: 'img/pt1.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              '75% Potion ',
+	              _react2.default.createElement('img', { src: 'img/pt2.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              '50% Potion ',
+	              _react2.default.createElement('img', { src: 'img/pt3.png', alt: '' })
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              '25% potion ',
+	              _react2.default.createElement('img', { src: 'img/pt4.png', alt: '' })
+	            )
 	          )
 	        )
 	      );
