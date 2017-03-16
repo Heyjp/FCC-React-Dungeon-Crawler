@@ -1,3 +1,6 @@
+.gitignore
+bundle.js
+
 # Logs
 logs
 *.log
